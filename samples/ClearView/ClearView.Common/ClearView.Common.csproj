@@ -38,7 +38,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Vulkan\Vulkan.csproj">
-      <Project>{15253e36-ddde-4c0a-9a6e-7632bacc8f7c}</Project>
+      <Project>{8b2854e5-a075-4db4-a7ad-c550646fa5d6}</Project>
       <Name>Vulkan</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\VulkanSample\VulkanSample.Common\VulkanSample.Common.csproj">

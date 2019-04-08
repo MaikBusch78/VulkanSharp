@@ -24,3 +24,7 @@ using System.Runtime.CompilerServices;
 
 //[assembly: AssemblyDelaySign(false)]
 //[assembly: AssemblyKeyFile("")]
+
+[assembly: InternalsVisibleTo("Vulkan.Android")]
+[assembly: InternalsVisibleTo("Vulkan.Windows")]
+[assembly: InternalsVisibleTo("Vulkan.iOS")]

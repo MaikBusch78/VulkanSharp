@@ -20,7 +20,7 @@ namespace VulkanSample.Android
 		protected override void NativeWindowAcquired ()
 		{
 			_physicalDevice = Instance.EnumeratePhysicalDevices () [0];
-			_surface = Instance.CreateAndroidSurfaceKHR (new AndroidSurfaceCreateInfoKhr { Window = aNativeWindow });
+			_surface = Instance.CreateAndroidSurfaceKHR (new Vulkan.Android.AndroidSurfaceCreateInfoKhr { Window = aNativeWindow });
 			_vulkanSample.Initialize (_physicalDevice, _surface);
 
 			base.NativeWindowAcquired ();

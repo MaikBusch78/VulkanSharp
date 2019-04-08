@@ -37,7 +37,7 @@ namespace Inspector
 
 		void InspectVulkan ()
 		{
-			var surface = Instance.CreateAndroidSurfaceKHR (new AndroidSurfaceCreateInfoKhr () {
+			var surface = Instance.CreateAndroidSurfaceKHR (new Vulkan.Android.AndroidSurfaceCreateInfoKhr() {
 				Window = aNativeWindow
 			});
 

@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="ConditionalBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Target Name="ConditionalBuild" Condition="'$(OS)' == 'Windows_NT'" DependsOnTargets="Build"/>
+  <Target Name="ConditionalBuild" Condition="'$(OS)' == 'Windows_NT'" DependsOnTargets="Build" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -54,7 +54,7 @@
       <Name>Vulkan.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Vulkan\Vulkan.csproj">
-      <Project>{15253E36-DDDE-4C0A-9A6E-7632BACC8F7C}</Project>
+      <Project>{8b2854e5-a075-4db4-a7ad-c550646fa5d6}</Project>
       <Name>Vulkan</Name>
     </ProjectReference>
     <ProjectReference Include="..\VulkanSample.Common\VulkanSample.Common.csproj">

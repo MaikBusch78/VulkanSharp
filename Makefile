@@ -14,12 +14,11 @@ $(BIN_PATH)/vk.xml:
 	cp "$@" $(BIN_PATH_RELEASE)
 
 $(BIN_PATH)/Vulkan.dll: $(wildcard src/Vulkan/*.cs src/Vulkan/*/*.cs tools/Generator/*cs)
-	msbuild /p:Configuration=$(CONFIGURATION)
+	xbuild /p:Configuration=$(CONFIGURATION)
 
 clean:
 	rm -Rf $(BIN_PATH)
 	rm -Rf $(BIN_PATH_RELEASE)
-	rm -rf netstandard/bin netstandard/obj
 
 fxcop: lib/gendarme-2.10/gendarme.exe
 	mono --debug $< --html $(BIN_PATH)/gendarme.html \
@@ -43,18 +42,12 @@ assemble-docs:
 	mdoc assemble --out=docs/Vulkan docs/en
 
 run-android-samples:
-	msbuild /t:Install\;_Run samples/Inspector/Inspector.csproj
-	msbuild /t:Install\;_Run samples/ClearView/ClearView.csproj
-	msbuild /t:Install\;_Run samples/XLogo/XLogo.csproj
+	xbuild /t:Install\;_Run samples/Inspector/Inspector.csproj
+	xbuild /t:Install\;_Run samples/ClearView/ClearView.csproj
+	xbuild /t:Install\;_Run samples/XLogo/XLogo.csproj
 
-nuget: all netstandard-vulkansharp
+nuget: all
 	nuget pack
 
 run-tests:
 	$(MAKE) -C tests/NativeMemory clean deploy run
-
-netstandard-vulkansharp: netstandard/Vulkan.csproj netstandard/obj/obj/project.assets.json
-	msbuild $<
-
-netstandard/obj/obj/project.assets.json: netstandard/Vulkan.csproj
-	nuget restore $<

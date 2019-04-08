@@ -20,7 +20,7 @@ namespace VulkanSample.Windows
 		{
 			base.OnLoad (e);
 
-			_physicalDevice = Instance.EnumeratePhysicalDevices () [0];
+			_physicalDevice = Instance.EnumeratePhysicalDevices () [1];
 			_vulkanSample.Initialize (_physicalDevice, Surface);
 		}
 
