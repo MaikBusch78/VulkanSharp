@@ -207,6 +207,25 @@ namespace Vulkan
                 Interop.NativeMethods.vkSubmitDebugUtilsMessageEXT(this.M, messageSeverity, messageTypes, pCallbackData != null ? pCallbackData.M : (Interop.DebugUtilsMessengerCallbackDataExt*)default(IntPtr));
             }
         }
+
+        public SurfaceKhr CreateHeadlessSurfaceEXT(HeadlessSurfaceCreateInfoExt pCreateInfo, AllocationCallbacks pAllocator = null)
+        {
+            Result result;
+            SurfaceKhr pSurface;
+            unsafe
+            {
+                pSurface = new SurfaceKhr();
+
+                fixed (UInt64* ptrpSurface = &pSurface.M)
+                {
+                    result = Interop.NativeMethods.vkCreateHeadlessSurfaceEXT(this.M, pCreateInfo != null ? pCreateInfo.M : (Interop.HeadlessSurfaceCreateInfoExt*)default(IntPtr), pAllocator != null ? pAllocator.M : null, ptrpSurface);
+                }
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                return pSurface;
+            }
+        }
     }
 
     public partial class PhysicalDevice : IMarshalling
@@ -1102,6 +1121,101 @@ namespace Vulkan
                 return pCapabilities;
             }
         }
+
+        public TimeDomainExt[] GetCalibrateableTimeDomainsEXT()
+        {
+            Result result;
+            unsafe
+            {
+                UInt32 pTimeDomainCount;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceCalibrateableTimeDomainsEXT(this.M, &pTimeDomainCount, null);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+                if (pTimeDomainCount <= 0)
+                    return null;
+
+                int size = 4;
+                var refpTimeDomains = new NativeReference((int)(size * pTimeDomainCount));
+                var ptrpTimeDomains = refpTimeDomains.Handle;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceCalibrateableTimeDomainsEXT(this.M, &pTimeDomainCount, (TimeDomainExt*)ptrpTimeDomains);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                if (pTimeDomainCount <= 0)
+                    return null;
+                var arr = new TimeDomainExt[pTimeDomainCount];
+                for (int i = 0; i < pTimeDomainCount; i++)
+                {
+                    arr[i] = new TimeDomainExt();
+                    arr[i] = ((TimeDomainExt*)ptrpTimeDomains)[i];
+                }
+
+                return arr;
+            }
+        }
+
+        public CooperativeMatrixPropertiesNv[] GetCooperativeMatrixPropertiesNV()
+        {
+            Result result;
+            unsafe
+            {
+                UInt32 pPropertyCount;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(this.M, &pPropertyCount, null);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+                if (pPropertyCount <= 0)
+                    return null;
+
+                int size = Marshal.SizeOf(typeof(Interop.CooperativeMatrixPropertiesNv));
+                var refpProperties = new NativeReference((int)(size * pPropertyCount));
+                var ptrpProperties = refpProperties.Handle;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(this.M, &pPropertyCount, (Interop.CooperativeMatrixPropertiesNv*)ptrpProperties);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                if (pPropertyCount <= 0)
+                    return null;
+                var arr = new CooperativeMatrixPropertiesNv[pPropertyCount];
+                for (int i = 0; i < pPropertyCount; i++)
+                {
+                    arr[i] = new CooperativeMatrixPropertiesNv(new NativePointer(refpProperties, (IntPtr)(&((Interop.CooperativeMatrixPropertiesNv*)ptrpProperties)[i])));
+                }
+
+                return arr;
+            }
+        }
+
+        public PresentModeKhr[] GetSurfacePresentModes2EXT(PhysicalDeviceSurfaceInfo2Khr pSurfaceInfo)
+        {
+            Result result;
+            unsafe
+            {
+                UInt32 pPresentModeCount;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceSurfacePresentModes2EXT(this.M, pSurfaceInfo != null ? pSurfaceInfo.M : (Interop.PhysicalDeviceSurfaceInfo2Khr*)default(IntPtr), &pPresentModeCount, null);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+                if (pPresentModeCount <= 0)
+                    return null;
+
+                int size = 4;
+                var refpPresentModes = new NativeReference((int)(size * pPresentModeCount));
+                var ptrpPresentModes = refpPresentModes.Handle;
+                result = Interop.NativeMethods.vkGetPhysicalDeviceSurfacePresentModes2EXT(this.M, pSurfaceInfo != null ? pSurfaceInfo.M : (Interop.PhysicalDeviceSurfaceInfo2Khr*)default(IntPtr), &pPresentModeCount, (PresentModeKhr*)ptrpPresentModes);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                if (pPresentModeCount <= 0)
+                    return null;
+                var arr = new PresentModeKhr[pPresentModeCount];
+                for (int i = 0; i < pPresentModeCount; i++)
+                {
+                    arr[i] = new PresentModeKhr();
+                    arr[i] = ((PresentModeKhr*)ptrpPresentModes)[i];
+                }
+
+                return arr;
+            }
+        }
     }
 
     public partial class Device : IMarshalling
@@ -1576,6 +1690,14 @@ namespace Vulkan
                     throw new ResultException(result);
 
                 return pData;
+            }
+        }
+
+        public void ResetQueryPoolEXT(QueryPool queryPool, UInt32 firstQuery, UInt32 queryCount)
+        {
+            unsafe
+            {
+                Interop.NativeMethods.vkResetQueryPoolEXT(this.M, queryPool != null ? queryPool.M : default(UInt64), firstQuery, queryCount);
             }
         }
 
@@ -2444,7 +2566,7 @@ namespace Vulkan
             }
         }
 
-        public void RegisterObjectsNVX(ObjectTableNvx objectTable, ObjectTableEntryNvx? ppObjectTableEntrie, UInt32? pObjectIndice)
+        public void RegisterObjectNVX(ObjectTableNvx objectTable, ObjectTableEntryNvx? ppObjectTableEntrie, UInt32? pObjectIndice)
         {
             Result result;
             unsafe
@@ -2482,7 +2604,7 @@ namespace Vulkan
             }
         }
 
-        public void UnregisterObjectsNVX(ObjectTableNvx objectTable, ObjectEntryTypeNvx pObjectEntryType, UInt32? pObjectIndice)
+        public void UnregisterObjectNVX(ObjectTableNvx objectTable, ObjectEntryTypeNvx pObjectEntryType, UInt32? pObjectIndice)
         {
             Result result;
             unsafe
@@ -3096,7 +3218,7 @@ namespace Vulkan
             }
         }
 
-        public void MergeValidationCachesEXT(ValidationCacheExt dstCache, ValidationCacheExt pSrcCache)
+        public void MergeValidationCacheEXT(ValidationCacheExt dstCache, ValidationCacheExt pSrcCache)
         {
             Result result;
             unsafe
@@ -3162,6 +3284,14 @@ namespace Vulkan
             }
         }
 
+        public void SetLocalDimmingAMD(SwapchainKhr swapChain, Bool32 localDimmingEnable)
+        {
+            unsafe
+            {
+                Interop.NativeMethods.vkSetLocalDimmingAMD(this.M, swapChain != null ? swapChain.M : default(UInt64), localDimmingEnable);
+            }
+        }
+
         public void SetDebugUtilsObjectNameEXT(DebugUtilsObjectNameInfoExt pNameInfo)
         {
             Result result;
@@ -3218,28 +3348,28 @@ namespace Vulkan
             }
         }
 
-        public void CompileDeferredNVX(Pipeline pipeline, UInt32 shader)
+        public void CompileDeferredNV(Pipeline pipeline, UInt32 shader)
         {
             Result result;
             unsafe
             {
-                result = Interop.NativeMethods.vkCompileDeferredNVX(this.M, pipeline != null ? pipeline.M : default(UInt64), shader);
+                result = Interop.NativeMethods.vkCompileDeferredNV(this.M, pipeline != null ? pipeline.M : default(UInt64), shader);
                 if (result != Result.Success)
                     throw new ResultException(result);
             }
         }
 
-        public AccelerationStructureNvx CreateAccelerationStructureNVX(AccelerationStructureCreateInfoNvx pCreateInfo, AllocationCallbacks pAllocator = null)
+        public AccelerationStructureNv CreateAccelerationStructureNV(AccelerationStructureCreateInfoNv pCreateInfo, AllocationCallbacks pAllocator = null)
         {
             Result result;
-            AccelerationStructureNvx pAccelerationStructure;
+            AccelerationStructureNv pAccelerationStructure;
             unsafe
             {
-                pAccelerationStructure = new AccelerationStructureNvx();
+                pAccelerationStructure = new AccelerationStructureNv();
 
                 fixed (UInt64* ptrpAccelerationStructure = &pAccelerationStructure.M)
                 {
-                    result = Interop.NativeMethods.vkCreateAccelerationStructureNVX(this.M, pCreateInfo != null ? pCreateInfo.M : (Interop.AccelerationStructureCreateInfoNvx*)default(IntPtr), pAllocator != null ? pAllocator.M : null, ptrpAccelerationStructure);
+                    result = Interop.NativeMethods.vkCreateAccelerationStructureNV(this.M, pCreateInfo != null ? pCreateInfo.M : (Interop.AccelerationStructureCreateInfoNv*)default(IntPtr), pAllocator != null ? pAllocator.M : null, ptrpAccelerationStructure);
                 }
                 if (result != Result.Success)
                     throw new ResultException(result);
@@ -3248,74 +3378,62 @@ namespace Vulkan
             }
         }
 
-        public void DestroyAccelerationStructureNVX(AccelerationStructureNvx accelerationStructure, AllocationCallbacks pAllocator = null)
+        public void DestroyAccelerationStructureNV(AccelerationStructureNv accelerationStructure, AllocationCallbacks pAllocator = null)
         {
             unsafe
             {
-                Interop.NativeMethods.vkDestroyAccelerationStructureNVX(this.M, accelerationStructure != null ? accelerationStructure.M : default(UInt64), pAllocator != null ? pAllocator.M : null);
+                Interop.NativeMethods.vkDestroyAccelerationStructureNV(this.M, accelerationStructure != null ? accelerationStructure.M : default(UInt64), pAllocator != null ? pAllocator.M : null);
             }
         }
 
-        public MemoryRequirements2 GetAccelerationStructureMemoryRequirementsNVX(AccelerationStructureMemoryRequirementsInfoNvx pInfo)
-        {
-            MemoryRequirements2 pMemoryRequirements;
-            unsafe
-            {
-                pMemoryRequirements = new MemoryRequirements2();
-                Interop.NativeMethods.vkGetAccelerationStructureMemoryRequirementsNVX(this.M, pInfo != null ? pInfo.M : (Interop.AccelerationStructureMemoryRequirementsInfoNvx*)default(IntPtr), pMemoryRequirements != null ? pMemoryRequirements.M : (Interop.MemoryRequirements2*)default(IntPtr));
-
-                return pMemoryRequirements;
-            }
-        }
-
-        public MemoryRequirements2 GetAccelerationStructureScratchMemoryRequirementsNVX(AccelerationStructureMemoryRequirementsInfoNvx pInfo)
+        public MemoryRequirements2 GetAccelerationStructureMemoryRequirementsNV(AccelerationStructureMemoryRequirementsInfoNv pInfo)
         {
             MemoryRequirements2 pMemoryRequirements;
             unsafe
             {
                 pMemoryRequirements = new MemoryRequirements2();
-                Interop.NativeMethods.vkGetAccelerationStructureScratchMemoryRequirementsNVX(this.M, pInfo != null ? pInfo.M : (Interop.AccelerationStructureMemoryRequirementsInfoNvx*)default(IntPtr), pMemoryRequirements != null ? pMemoryRequirements.M : (Interop.MemoryRequirements2*)default(IntPtr));
+                Interop.NativeMethods.vkGetAccelerationStructureMemoryRequirementsNV(this.M, pInfo != null ? pInfo.M : (Interop.AccelerationStructureMemoryRequirementsInfoNv*)default(IntPtr), pMemoryRequirements != null ? pMemoryRequirements.M : (Interop.MemoryRequirements2*)default(IntPtr));
 
                 return pMemoryRequirements;
             }
         }
 
-        public void BindAccelerationStructureMemoryNVX(BindAccelerationStructureMemoryInfoNvx[] pBindInfos)
+        public void BindAccelerationStructureMemoryNV(BindAccelerationStructureMemoryInfoNv[] pBindInfos)
         {
             Result result;
             unsafe
             {
-                var arraypBindInfos = pBindInfos == null ? IntPtr.Zero : Marshal.AllocHGlobal(pBindInfos.Length * sizeof(Interop.BindAccelerationStructureMemoryInfoNvx));
+                var arraypBindInfos = pBindInfos == null ? IntPtr.Zero : Marshal.AllocHGlobal(pBindInfos.Length * sizeof(Interop.BindAccelerationStructureMemoryInfoNv));
                 var lenpBindInfos = pBindInfos == null ? 0 : pBindInfos.Length;
                 if (pBindInfos != null)
                     for (int i = 0; i < pBindInfos.Length; i++)
-                        ((Interop.BindAccelerationStructureMemoryInfoNvx*)arraypBindInfos)[i] = *(pBindInfos[i].M);
-                result = Interop.NativeMethods.vkBindAccelerationStructureMemoryNVX(this.M, (uint)lenpBindInfos, (Interop.BindAccelerationStructureMemoryInfoNvx*)arraypBindInfos);
+                        ((Interop.BindAccelerationStructureMemoryInfoNv*)arraypBindInfos)[i] = *(pBindInfos[i].M);
+                result = Interop.NativeMethods.vkBindAccelerationStructureMemoryNV(this.M, (uint)lenpBindInfos, (Interop.BindAccelerationStructureMemoryInfoNv*)arraypBindInfos);
                 Marshal.FreeHGlobal(arraypBindInfos);
                 if (result != Result.Success)
                     throw new ResultException(result);
             }
         }
 
-        public void BindAccelerationStructureMemoryNVX(BindAccelerationStructureMemoryInfoNvx pBindInfo)
+        public void BindAccelerationStructureMemoryNV(BindAccelerationStructureMemoryInfoNv pBindInfo)
         {
             Result result;
             unsafe
             {
-                result = Interop.NativeMethods.vkBindAccelerationStructureMemoryNVX(this.M, (UInt32)(pBindInfo != null ? 1 : 0), pBindInfo != null ? pBindInfo.M : (Interop.BindAccelerationStructureMemoryInfoNvx*)default(IntPtr));
+                result = Interop.NativeMethods.vkBindAccelerationStructureMemoryNV(this.M, (UInt32)(pBindInfo != null ? 1 : 0), pBindInfo != null ? pBindInfo.M : (Interop.BindAccelerationStructureMemoryInfoNv*)default(IntPtr));
                 if (result != Result.Success)
                     throw new ResultException(result);
             }
         }
 
-        public IntPtr GetRaytracingShaderHandlesNVX(Pipeline pipeline, UInt32 firstGroup, UInt32 groupCount, UIntPtr dataSize)
+        public IntPtr GetRayTracingShaderGroupHandlesNV(Pipeline pipeline, UInt32 firstGroup, UInt32 groupCount, UIntPtr dataSize)
         {
             Result result;
             IntPtr pData;
             unsafe
             {
                 pData = new IntPtr();
-                result = Interop.NativeMethods.vkGetRaytracingShaderHandlesNVX(this.M, pipeline != null ? pipeline.M : default(UInt64), firstGroup, groupCount, dataSize, pData);
+                result = Interop.NativeMethods.vkGetRayTracingShaderGroupHandlesNV(this.M, pipeline != null ? pipeline.M : default(UInt64), firstGroup, groupCount, dataSize, pData);
                 if (result != Result.Success)
                     throw new ResultException(result);
 
@@ -3323,18 +3441,105 @@ namespace Vulkan
             }
         }
 
-        public IntPtr GetAccelerationStructureHandleNVX(AccelerationStructureNvx accelerationStructure, UIntPtr dataSize)
+        public IntPtr GetAccelerationStructureHandleNV(AccelerationStructureNv accelerationStructure, UIntPtr dataSize)
         {
             Result result;
             IntPtr pData;
             unsafe
             {
                 pData = new IntPtr();
-                result = Interop.NativeMethods.vkGetAccelerationStructureHandleNVX(this.M, accelerationStructure != null ? accelerationStructure.M : default(UInt64), dataSize, pData);
+                result = Interop.NativeMethods.vkGetAccelerationStructureHandleNV(this.M, accelerationStructure != null ? accelerationStructure.M : default(UInt64), dataSize, pData);
                 if (result != Result.Success)
                     throw new ResultException(result);
 
                 return pData;
+            }
+        }
+
+        public Pipeline[] CreateRayTracingPipelinesNV(PipelineCache pipelineCache, RayTracingPipelineCreateInfoNv[] pCreateInfos, AllocationCallbacks pAllocator = null)
+        {
+            Result result;
+            unsafe
+            {
+                if (pCreateInfos.Length <= 0)
+                    return null;
+
+                int size = Marshal.SizeOf(typeof(UInt64));
+                var refpPipelines = new NativeReference((int)(size * pCreateInfos.Length));
+                var ptrpPipelines = refpPipelines.Handle;
+                var arraypCreateInfos = pCreateInfos == null ? IntPtr.Zero : Marshal.AllocHGlobal(pCreateInfos.Length * sizeof(Interop.RayTracingPipelineCreateInfoNv));
+                var lenpCreateInfos = pCreateInfos == null ? 0 : pCreateInfos.Length;
+                if (pCreateInfos != null)
+                    for (int i = 0; i < pCreateInfos.Length; i++)
+                        ((Interop.RayTracingPipelineCreateInfoNv*)arraypCreateInfos)[i] = *(pCreateInfos[i].M);
+                result = Interop.NativeMethods.vkCreateRayTracingPipelinesNV(this.M, pipelineCache != null ? pipelineCache.M : default(UInt64), (uint)lenpCreateInfos, (Interop.RayTracingPipelineCreateInfoNv*)arraypCreateInfos, pAllocator != null ? pAllocator.M : null, (UInt64*)ptrpPipelines);
+                Marshal.FreeHGlobal(arraypCreateInfos);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                if (pCreateInfos.Length <= 0)
+                    return null;
+                var arr = new Pipeline[pCreateInfos.Length];
+                for (int i = 0; i < pCreateInfos.Length; i++)
+                {
+                    arr[i] = new Pipeline();
+                    arr[i].M = ((UInt64*)ptrpPipelines)[i];
+                }
+
+                return arr;
+            }
+        }
+
+        public DeviceAddress GetBufferDeviceAddressEXT(BufferDeviceAddressInfoExt pInfo)
+        {
+            unsafe
+            {
+                return Interop.NativeMethods.vkGetBufferDeviceAddressEXT(this.M, pInfo != null ? pInfo.M : (Interop.BufferDeviceAddressInfoExt*)default(IntPtr));
+            }
+        }
+
+        public UInt32 GetImageViewHandleNVX(ImageViewHandleInfoNvx pInfo)
+        {
+            unsafe
+            {
+                return Interop.NativeMethods.vkGetImageViewHandleNVX(this.M, pInfo != null ? pInfo.M : (Interop.ImageViewHandleInfoNvx*)default(IntPtr));
+            }
+        }
+
+        public DeviceGroupPresentModeFlagsKhr GetGroupSurfacePresentModes2EXT(PhysicalDeviceSurfaceInfo2Khr pSurfaceInfo)
+        {
+            Result result;
+            DeviceGroupPresentModeFlagsKhr pModes;
+            unsafe
+            {
+                pModes = new DeviceGroupPresentModeFlagsKhr();
+                result = Interop.NativeMethods.vkGetDeviceGroupSurfacePresentModes2EXT(this.M, pSurfaceInfo != null ? pSurfaceInfo.M : (Interop.PhysicalDeviceSurfaceInfo2Khr*)default(IntPtr), &pModes);
+                if (result != Result.Success)
+                    throw new ResultException(result);
+
+                return pModes;
+            }
+        }
+
+        public void AcquireFullScreenExclusiveModeEXT(SwapchainKhr swapchain)
+        {
+            Result result;
+            unsafe
+            {
+                result = Interop.NativeMethods.vkAcquireFullScreenExclusiveModeEXT(this.M, swapchain != null ? swapchain.M : default(UInt64));
+                if (result != Result.Success)
+                    throw new ResultException(result);
+            }
+        }
+
+        public void ReleaseFullScreenExclusiveModeEXT(SwapchainKhr swapchain)
+        {
+            Result result;
+            unsafe
+            {
+                result = Interop.NativeMethods.vkReleaseFullScreenExclusiveModeEXT(this.M, swapchain != null ? swapchain.M : default(UInt64));
+                if (result != Result.Success)
+                    throw new ResultException(result);
             }
         }
     }
@@ -4243,22 +4448,6 @@ namespace Vulkan
             }
         }
 
-        public void CmdDrawIndirectCountAMD(Buffer buffer, DeviceSize offset, Buffer countBuffer, DeviceSize countBufferOffset, UInt32 maxDrawCount, UInt32 stride)
-        {
-            unsafe
-            {
-                Interop.NativeMethods.vkCmdDrawIndirectCountAMD(this.M, buffer != null ? buffer.M : default(UInt64), offset, countBuffer != null ? countBuffer.M : default(UInt64), countBufferOffset, maxDrawCount, stride);
-            }
-        }
-
-        public void CmdDrawIndexedIndirectCountAMD(Buffer buffer, DeviceSize offset, Buffer countBuffer, DeviceSize countBufferOffset, UInt32 maxDrawCount, UInt32 stride)
-        {
-            unsafe
-            {
-                Interop.NativeMethods.vkCmdDrawIndexedIndirectCountAMD(this.M, buffer != null ? buffer.M : default(UInt64), offset, countBuffer != null ? countBuffer.M : default(UInt64), countBufferOffset, maxDrawCount, stride);
-            }
-        }
-
         public void CmdProcessCommandsNVX(CmdProcessCommandsInfoNvx pProcessCommandsInfo)
         {
             unsafe
@@ -4457,6 +4646,96 @@ namespace Vulkan
             }
         }
 
+        public void CmdBindTransformFeedbackBuffersEXT(UInt32 firstBinding, Buffer[] pBuffers, DeviceSize[] pOffsets, DeviceSize[] pSizes = null)
+        {
+            unsafe
+            {
+                var arraypBuffers = pBuffers == null ? IntPtr.Zero : Marshal.AllocHGlobal(pBuffers.Length * sizeof(UInt64));
+                var lenpBuffers = pBuffers == null ? 0 : pBuffers.Length;
+                if (pBuffers != null)
+                    for (int i = 0; i < pBuffers.Length; i++)
+                        ((UInt64*)arraypBuffers)[i] = (pBuffers[i].M);
+                var arraypOffsets = pOffsets == null ? IntPtr.Zero : Marshal.AllocHGlobal(pOffsets.Length * sizeof(DeviceSize));
+                var lenpOffsets = pOffsets == null ? 0 : pOffsets.Length;
+                if (pOffsets != null)
+                    for (int i = 0; i < pOffsets.Length; i++)
+                        ((DeviceSize*)arraypOffsets)[i] = (pOffsets[i]);
+                var arraypSizes = pSizes == null ? IntPtr.Zero : Marshal.AllocHGlobal(pSizes.Length * sizeof(DeviceSize));
+                var lenpSizes = pSizes == null ? 0 : pSizes.Length;
+                if (pSizes != null)
+                    for (int i = 0; i < pSizes.Length; i++)
+                        ((DeviceSize*)arraypSizes)[i] = (pSizes[i]);
+                Interop.NativeMethods.vkCmdBindTransformFeedbackBuffersEXT(this.M, firstBinding, (uint)lenpSizes, (UInt64*)arraypBuffers, (DeviceSize*)arraypOffsets, (DeviceSize*)arraypSizes);
+                Marshal.FreeHGlobal(arraypBuffers);
+                Marshal.FreeHGlobal(arraypOffsets);
+                Marshal.FreeHGlobal(arraypSizes);
+            }
+        }
+
+        public void CmdBeginTransformFeedbackEXT(UInt32 firstCounterBuffer, Buffer[] pCounterBuffers, DeviceSize[] pCounterBufferOffsets = null)
+        {
+            unsafe
+            {
+                var arraypCounterBuffers = pCounterBuffers == null ? IntPtr.Zero : Marshal.AllocHGlobal(pCounterBuffers.Length * sizeof(UInt64));
+                var lenpCounterBuffers = pCounterBuffers == null ? 0 : pCounterBuffers.Length;
+                if (pCounterBuffers != null)
+                    for (int i = 0; i < pCounterBuffers.Length; i++)
+                        ((UInt64*)arraypCounterBuffers)[i] = (pCounterBuffers[i].M);
+                var arraypCounterBufferOffsets = pCounterBufferOffsets == null ? IntPtr.Zero : Marshal.AllocHGlobal(pCounterBufferOffsets.Length * sizeof(DeviceSize));
+                var lenpCounterBufferOffsets = pCounterBufferOffsets == null ? 0 : pCounterBufferOffsets.Length;
+                if (pCounterBufferOffsets != null)
+                    for (int i = 0; i < pCounterBufferOffsets.Length; i++)
+                        ((DeviceSize*)arraypCounterBufferOffsets)[i] = (pCounterBufferOffsets[i]);
+                Interop.NativeMethods.vkCmdBeginTransformFeedbackEXT(this.M, firstCounterBuffer, (uint)lenpCounterBufferOffsets, (UInt64*)arraypCounterBuffers, (DeviceSize*)arraypCounterBufferOffsets);
+                Marshal.FreeHGlobal(arraypCounterBuffers);
+                Marshal.FreeHGlobal(arraypCounterBufferOffsets);
+            }
+        }
+
+        public void CmdEndTransformFeedbackEXT(UInt32 firstCounterBuffer, Buffer[] pCounterBuffers, DeviceSize[] pCounterBufferOffsets = null)
+        {
+            unsafe
+            {
+                var arraypCounterBuffers = pCounterBuffers == null ? IntPtr.Zero : Marshal.AllocHGlobal(pCounterBuffers.Length * sizeof(UInt64));
+                var lenpCounterBuffers = pCounterBuffers == null ? 0 : pCounterBuffers.Length;
+                if (pCounterBuffers != null)
+                    for (int i = 0; i < pCounterBuffers.Length; i++)
+                        ((UInt64*)arraypCounterBuffers)[i] = (pCounterBuffers[i].M);
+                var arraypCounterBufferOffsets = pCounterBufferOffsets == null ? IntPtr.Zero : Marshal.AllocHGlobal(pCounterBufferOffsets.Length * sizeof(DeviceSize));
+                var lenpCounterBufferOffsets = pCounterBufferOffsets == null ? 0 : pCounterBufferOffsets.Length;
+                if (pCounterBufferOffsets != null)
+                    for (int i = 0; i < pCounterBufferOffsets.Length; i++)
+                        ((DeviceSize*)arraypCounterBufferOffsets)[i] = (pCounterBufferOffsets[i]);
+                Interop.NativeMethods.vkCmdEndTransformFeedbackEXT(this.M, firstCounterBuffer, (uint)lenpCounterBufferOffsets, (UInt64*)arraypCounterBuffers, (DeviceSize*)arraypCounterBufferOffsets);
+                Marshal.FreeHGlobal(arraypCounterBuffers);
+                Marshal.FreeHGlobal(arraypCounterBufferOffsets);
+            }
+        }
+
+        public void CmdBeginQueryIndexedEXT(QueryPool queryPool, UInt32 query, QueryControlFlags flags, UInt32 index)
+        {
+            unsafe
+            {
+                Interop.NativeMethods.vkCmdBeginQueryIndexedEXT(this.M, queryPool != null ? queryPool.M : default(UInt64), query, flags, index);
+            }
+        }
+
+        public void CmdEndQueryIndexedEXT(QueryPool queryPool, UInt32 query, UInt32 index)
+        {
+            unsafe
+            {
+                Interop.NativeMethods.vkCmdEndQueryIndexedEXT(this.M, queryPool != null ? queryPool.M : default(UInt64), query, index);
+            }
+        }
+
+        public void CmdDrawIndirectByteCountEXT(UInt32 instanceCount, UInt32 firstInstance, Buffer counterBuffer, DeviceSize counterBufferOffset, UInt32 counterOffset, UInt32 vertexStride)
+        {
+            unsafe
+            {
+                Interop.NativeMethods.vkCmdDrawIndirectByteCountEXT(this.M, instanceCount, firstInstance, counterBuffer != null ? counterBuffer.M : default(UInt64), counterBufferOffset, counterOffset, vertexStride);
+            }
+        }
+
         public void CmdSetExclusiveScissorNV(UInt32 firstExclusiveScissor, Rect2D[] pExclusiveScissors)
         {
             unsafe
@@ -4557,49 +4836,52 @@ namespace Vulkan
             }
         }
 
-        public void CmdCopyAccelerationStructureNVX(AccelerationStructureNvx dst, AccelerationStructureNvx src, CopyAccelerationStructureModeNvx mode)
+        public void CmdCopyAccelerationStructureNV(AccelerationStructureNv dst, AccelerationStructureNv src, CopyAccelerationStructureModeNv mode)
         {
             unsafe
             {
-                Interop.NativeMethods.vkCmdCopyAccelerationStructureNVX(this.M, dst != null ? dst.M : default(UInt64), src != null ? src.M : default(UInt64), mode);
+                Interop.NativeMethods.vkCmdCopyAccelerationStructureNV(this.M, dst != null ? dst.M : default(UInt64), src != null ? src.M : default(UInt64), mode);
             }
         }
 
-        public void CmdWriteAccelerationStructurePropertiesNVX(AccelerationStructureNvx accelerationStructure, QueryType queryType, QueryPool queryPool, UInt32 query)
+        public void CmdWriteAccelerationStructuresPropertiesNV(AccelerationStructureNv[] pAccelerationStructures, QueryType queryType, QueryPool queryPool, UInt32 firstQuery)
         {
             unsafe
             {
-                Interop.NativeMethods.vkCmdWriteAccelerationStructurePropertiesNVX(this.M, accelerationStructure != null ? accelerationStructure.M : default(UInt64), queryType, queryPool != null ? queryPool.M : default(UInt64), query);
+                var arraypAccelerationStructures = pAccelerationStructures == null ? IntPtr.Zero : Marshal.AllocHGlobal(pAccelerationStructures.Length * sizeof(UInt64));
+                var lenpAccelerationStructures = pAccelerationStructures == null ? 0 : pAccelerationStructures.Length;
+                if (pAccelerationStructures != null)
+                    for (int i = 0; i < pAccelerationStructures.Length; i++)
+                        ((UInt64*)arraypAccelerationStructures)[i] = (pAccelerationStructures[i].M);
+                Interop.NativeMethods.vkCmdWriteAccelerationStructuresPropertiesNV(this.M, (uint)lenpAccelerationStructures, (UInt64*)arraypAccelerationStructures, queryType, queryPool != null ? queryPool.M : default(UInt64), firstQuery);
+                Marshal.FreeHGlobal(arraypAccelerationStructures);
             }
         }
 
-        public void CmdBuildAccelerationStructureNVX(AccelerationStructureTypeNvx type, UInt32 instanceCount, Buffer instanceData, DeviceSize instanceOffset, GeometryNvx[] pGeometries, BuildAccelerationStructureFlagsNvx flags, Bool32 update, AccelerationStructureNvx dst, AccelerationStructureNvx src, Buffer scratch, DeviceSize scratchOffset)
+        public void CmdWriteAccelerationStructuresPropertieNV(AccelerationStructureNv pAccelerationStructure, QueryType queryType, QueryPool queryPool, UInt32 firstQuery)
         {
             unsafe
             {
-                var arraypGeometries = pGeometries == null ? IntPtr.Zero : Marshal.AllocHGlobal(pGeometries.Length * sizeof(Interop.GeometryNvx));
-                var lenpGeometries = pGeometries == null ? 0 : pGeometries.Length;
-                if (pGeometries != null)
-                    for (int i = 0; i < pGeometries.Length; i++)
-                        ((Interop.GeometryNvx*)arraypGeometries)[i] = *(pGeometries[i].M);
-                Interop.NativeMethods.vkCmdBuildAccelerationStructureNVX(this.M, type, instanceCount, instanceData != null ? instanceData.M : default(UInt64), instanceOffset, (uint)lenpGeometries, (Interop.GeometryNvx*)arraypGeometries, flags, update, dst != null ? dst.M : default(UInt64), src != null ? src.M : default(UInt64), scratch != null ? scratch.M : default(UInt64), scratchOffset);
-                Marshal.FreeHGlobal(arraypGeometries);
+                fixed (UInt64* ptrpAccelerationStructure = &pAccelerationStructure.M)
+                {
+                    Interop.NativeMethods.vkCmdWriteAccelerationStructuresPropertiesNV(this.M, (UInt32)(pAccelerationStructure != null ? 1 : 0), ptrpAccelerationStructure, queryType, queryPool != null ? queryPool.M : default(UInt64), firstQuery);
+                }
             }
         }
 
-        public void CmdBuildAccelerationStructureNVX(AccelerationStructureTypeNvx type, UInt32 instanceCount, Buffer instanceData, DeviceSize instanceOffset, GeometryNvx pGeometrie, BuildAccelerationStructureFlagsNvx flag, Bool32 update, AccelerationStructureNvx dst, AccelerationStructureNvx src, Buffer scratch, DeviceSize scratchOffset)
+        public void CmdBuildAccelerationStructureNV(AccelerationStructureInfoNv pInfo, Buffer instanceData, DeviceSize instanceOffset, Bool32 update, AccelerationStructureNv dst, AccelerationStructureNv src, Buffer scratch, DeviceSize scratchOffset)
         {
             unsafe
             {
-                Interop.NativeMethods.vkCmdBuildAccelerationStructureNVX(this.M, type, instanceCount, instanceData != null ? instanceData.M : default(UInt64), instanceOffset, (UInt32)(pGeometrie != null ? 1 : 0), pGeometrie != null ? pGeometrie.M : (Interop.GeometryNvx*)default(IntPtr), flag, update, dst != null ? dst.M : default(UInt64), src != null ? src.M : default(UInt64), scratch != null ? scratch.M : default(UInt64), scratchOffset);
+                Interop.NativeMethods.vkCmdBuildAccelerationStructureNV(this.M, pInfo != null ? pInfo.M : (Interop.AccelerationStructureInfoNv*)default(IntPtr), instanceData != null ? instanceData.M : default(UInt64), instanceOffset, update, dst != null ? dst.M : default(UInt64), src != null ? src.M : default(UInt64), scratch != null ? scratch.M : default(UInt64), scratchOffset);
             }
         }
 
-        public void CmdTraceRaysNVX(Buffer raygenShaderBindingTableBuffer, DeviceSize raygenShaderBindingOffset, Buffer missShaderBindingTableBuffer, DeviceSize missShaderBindingOffset, DeviceSize missShaderBindingStride, Buffer hitShaderBindingTableBuffer, DeviceSize hitShaderBindingOffset, DeviceSize hitShaderBindingStride, UInt32 width, UInt32 height)
+        public void CmdTraceRaysNV(Buffer raygenShaderBindingTableBuffer, DeviceSize raygenShaderBindingOffset, Buffer missShaderBindingTableBuffer, DeviceSize missShaderBindingOffset, DeviceSize missShaderBindingStride, Buffer hitShaderBindingTableBuffer, DeviceSize hitShaderBindingOffset, DeviceSize hitShaderBindingStride, Buffer callableShaderBindingTableBuffer, DeviceSize callableShaderBindingOffset, DeviceSize callableShaderBindingStride, UInt32 width, UInt32 height, UInt32 depth)
         {
             unsafe
             {
-                Interop.NativeMethods.vkCmdTraceRaysNVX(this.M, raygenShaderBindingTableBuffer != null ? raygenShaderBindingTableBuffer.M : default(UInt64), raygenShaderBindingOffset, missShaderBindingTableBuffer != null ? missShaderBindingTableBuffer.M : default(UInt64), missShaderBindingOffset, missShaderBindingStride, hitShaderBindingTableBuffer != null ? hitShaderBindingTableBuffer.M : default(UInt64), hitShaderBindingOffset, hitShaderBindingStride, width, height);
+                Interop.NativeMethods.vkCmdTraceRaysNV(this.M, raygenShaderBindingTableBuffer != null ? raygenShaderBindingTableBuffer.M : default(UInt64), raygenShaderBindingOffset, missShaderBindingTableBuffer != null ? missShaderBindingTableBuffer.M : default(UInt64), missShaderBindingOffset, missShaderBindingStride, hitShaderBindingTableBuffer != null ? hitShaderBindingTableBuffer.M : default(UInt64), hitShaderBindingOffset, hitShaderBindingStride, callableShaderBindingTableBuffer != null ? callableShaderBindingTableBuffer.M : default(UInt64), callableShaderBindingOffset, callableShaderBindingStride, width, height, depth);
             }
         }
     }
@@ -4954,9 +5236,9 @@ namespace Vulkan
         }
     }
 
-    public partial class AccelerationStructureNvx : INonDispatchableHandleMarshalling
+    public partial class AccelerationStructureNv : INonDispatchableHandleMarshalling
     {
-        internal AccelerationStructureNvx() { }
+        internal AccelerationStructureNv() { }
 
         internal UInt64 M;
         UInt64 INonDispatchableHandleMarshalling.Handle

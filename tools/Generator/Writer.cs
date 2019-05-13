@@ -12,7 +12,7 @@ namespace VulkanSharp.Generator
         List<string> writerContentList;
 
         public static bool WriterKindList = false;
-        public static bool IndentationKindVisualStudio = false;
+        public static bool IndentWithSpaces = false;
 
         void WriteLicensingInformation()
         {
@@ -30,7 +30,7 @@ namespace VulkanSharp.Generator
 
             Directory.CreateDirectory(Path.GetDirectoryName(writerPath));
 
-            WriterKindList |= IndentationKindVisualStudio;
+            WriterKindList |= IndentWithSpaces;
 
             if (WriterKindList == false)
             {
@@ -76,7 +76,7 @@ namespace VulkanSharp.Generator
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(writerPath));
 
-                if (IndentationKindVisualStudio)
+                if (IndentWithSpaces)
                 {
                     var contentToWrite = new List<string>(writerContentList.Count);
 
@@ -133,7 +133,7 @@ namespace VulkanSharp.Generator
         private string Indentation()
         {
             if (IndentLevel == 0) return "";
-            var indent = IndentationKindVisualStudio == false ? "\t" : "    ";
+            var indent = IndentWithSpaces == false ? "\t" : "    ";
             return Enumerable.Repeat(indent, IndentLevel).Aggregate((a, b) => a + b);
         }
 

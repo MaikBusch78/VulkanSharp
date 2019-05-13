@@ -26,7 +26,9 @@ namespace VulkanSharp.Generator
                 }
 
                 if (specialParts.ContainsKey(part))
+                {
                     sw.Write(specialParts[part]);
+                }
                 else
                 if (part.Length > 0)
                 {
@@ -56,7 +58,7 @@ namespace VulkanSharp.Generator
             return sw.ToString();
         }
 
-        static Dictionary<string, string> specialParts = new Dictionary<string, string>
+        protected static Dictionary<string, string> specialParts = new Dictionary<string, string>
         {
             { "AMD", "Amd" },
             { "API", "Api" },
@@ -201,19 +203,28 @@ namespace VulkanSharp.Generator
 
         protected string GetTypeCsName(string name, string typeName = "type")
         {
-            if (typesTranslation.ContainsKey(name))
-                return typesTranslation[name];
+            if (nativeTypesTranslation.ContainsKey(name))
+            {
+                return nativeTypesTranslation[name];
+            }
 
             string csName;
 
             if (name.StartsWith("Vk", StringComparison.OrdinalIgnoreCase))
             {
                 csName = name.Substring(2);
+
+                if (csName.Contains("PCIBusInfo"))
+                {
+                    csName = csName.Replace("PCIBusInfo", "PciBusInfo");
+                }
             }
             else if (name.EndsWith("_t"))
             {
                 if (!basicTypesMap.ContainsKey(name))
+                {
                     throw new NotImplementedException(string.Format("Mapping for the basic type {0} isn't supported", name));
+                }
 
                 csName = basicTypesMap[name];
             }
@@ -235,12 +246,13 @@ namespace VulkanSharp.Generator
             return csName;
         }
 
-        protected Dictionary<string, string> typesTranslation = new Dictionary<string, string>()
+        protected Dictionary<string, string> nativeTypesTranslation = new Dictionary<string, string>()
         {
             { "ANativeWindow", "IntPtr" },
             { "AHardwareBuffer", "IntPtr" }, // TODO: richtig ?
-            { "HWND", "IntPtr" },
             { "HINSTANCE", "IntPtr" },
+            { "HWND", "IntPtr" },
+            { "HMONITOR", "IntPtr" },
             { "HANDLE", "IntPtr" },
             { "DWORD", "UInt32" },
             { "SECURITY_ATTRIBUTES", "SecurityAttributes" },
@@ -252,7 +264,10 @@ namespace VulkanSharp.Generator
         {
             { "int32_t", "Int32" },
             { "uint32_t", "UInt32" },
+            { "int64_t", "Int64" },
             { "uint64_t", "UInt64" },
+            { "int16_t", "Int16" },
+            { "uint16_t", "UInt16" },
             { "uint8_t", "byte" },
             { "size_t", "UIntPtr" },
             { "xcb_connection_t", "IntPtr" },

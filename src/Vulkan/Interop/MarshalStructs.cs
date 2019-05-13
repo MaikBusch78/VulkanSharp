@@ -1844,6 +1844,31 @@ namespace Vulkan.Interop
         internal IntPtr DisabledValidationChecks;
     }
 
+    internal partial struct ValidationFeaturesExt
+    {
+        /// <summary>
+        /// Must be VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT
+        /// </summary>
+        internal StructureType SType;
+        internal IntPtr Next;
+        /// <summary>
+        /// Number of validation features to enable
+        /// </summary>
+        internal UInt32 EnabledValidationFeatureCount;
+        /// <summary>
+        /// Validation features to enable
+        /// </summary>
+        internal IntPtr EnabledValidationFeatures;
+        /// <summary>
+        /// Number of validation features to disable
+        /// </summary>
+        internal UInt32 DisabledValidationFeatureCount;
+        /// <summary>
+        /// Validation features to disable
+        /// </summary>
+        internal IntPtr DisabledValidationFeatures;
+    }
+
     internal partial struct PipelineRasterizationStateRasterizationOrderAmd
     {
         internal StructureType SType;
@@ -2174,7 +2199,7 @@ namespace Vulkan.Interop
     {
         internal StructureType SType;
         internal IntPtr Next;
-        internal UInt32 DriverId;
+        internal DriverIdKhr DriverId;
         internal unsafe fixed byte DriverName[256];
         internal unsafe fixed byte DriverInfo[256];
         internal ConformanceVersionKhr ConformanceVersion;
@@ -2206,7 +2231,7 @@ namespace Vulkan.Interop
         internal IntPtr Rectangles;
     }
 
-    internal partial struct PhysicalDeviceVariablePointerFeatures
+    internal partial struct PhysicalDeviceVariablePointersFeatures
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -2748,6 +2773,20 @@ namespace Vulkan.Interop
         /// </summary>
         internal float MaxContentLightLevel;
         internal float MaxFrameAverageLightLevel;
+    }
+
+    internal partial struct DisplayNativeHdrSurfaceCapabilitiesAmd
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 LocalDimmingSupport;
+    }
+
+    internal partial struct SwapchainDisplayNativeHdrCreateInfoAmd
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 LocalDimmingEnable;
     }
 
     internal partial struct PresentTimesInfoGoogle
@@ -3317,11 +3356,49 @@ namespace Vulkan.Interop
         internal Bool32 Supported;
     }
 
-    internal partial struct PhysicalDeviceShaderDrawParameterFeatures
+    internal partial struct PhysicalDeviceShaderDrawParametersFeatures
     {
         internal StructureType SType;
         internal IntPtr Next;
         internal Bool32 ShaderDrawParameters;
+    }
+
+    internal partial struct PhysicalDeviceFloat16Int8FeaturesKhr
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 ShaderFloat16;
+        internal Bool32 ShaderInt8;
+    }
+
+    internal partial struct PhysicalDeviceFloatControlsPropertiesKhr
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 SeparateDenormSettings;
+        internal Bool32 SeparateRoundingModeSettings;
+        internal Bool32 ShaderSignedZeroInfNanPreserveFloat16;
+        internal Bool32 ShaderSignedZeroInfNanPreserveFloat32;
+        internal Bool32 ShaderSignedZeroInfNanPreserveFloat64;
+        internal Bool32 ShaderDenormPreserveFloat16;
+        internal Bool32 ShaderDenormPreserveFloat32;
+        internal Bool32 ShaderDenormPreserveFloat64;
+        internal Bool32 ShaderDenormFlushToZeroFloat16;
+        internal Bool32 ShaderDenormFlushToZeroFloat32;
+        internal Bool32 ShaderDenormFlushToZeroFloat64;
+        internal Bool32 ShaderRoundingModeRtefloat16;
+        internal Bool32 ShaderRoundingModeRtefloat32;
+        internal Bool32 ShaderRoundingModeRtefloat64;
+        internal Bool32 ShaderRoundingModeRtzfloat16;
+        internal Bool32 ShaderRoundingModeRtzfloat32;
+        internal Bool32 ShaderRoundingModeRtzfloat64;
+    }
+
+    internal partial struct PhysicalDeviceHostQueryResetFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 HostQueryReset;
     }
 
     internal partial struct ShaderStatisticsInfoAmd
@@ -3462,6 +3539,13 @@ namespace Vulkan.Interop
         /// true if the implementation supports both conservative rasterization and post depth coverage sample coverage mask
         /// </summary>
         internal Bool32 ConservativeRasterizationPostDepthCoverage;
+    }
+
+    internal partial struct CalibratedTimestampInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal TimeDomainExt TimeDomain;
     }
 
     internal partial struct PhysicalDeviceShaderCorePropertiesAmd
@@ -3729,6 +3813,16 @@ namespace Vulkan.Interop
         internal UInt32 MaxVertexAttribDivisor;
     }
 
+    internal partial struct PhysicalDevicePciBusInfoPropertiesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt32 PciDomain;
+        internal UInt32 PciBus;
+        internal UInt32 PciDevice;
+        internal UInt32 PciFunction;
+    }
+
     internal partial struct ImportAndroidHardwareBufferInfoAndroid
     {
         internal StructureType SType;
@@ -3821,6 +3915,7 @@ namespace Vulkan.Interop
         internal IntPtr Next;
         internal Bool32 VulkanMemoryModel;
         internal Bool32 VulkanMemoryModelDeviceScope;
+        internal Bool32 VulkanMemoryModelAvailabilityVisibilityChains;
     }
 
     internal partial struct PhysicalDeviceShaderAtomicInt64FeaturesKhr
@@ -3854,6 +3949,46 @@ namespace Vulkan.Interop
         internal IntPtr CheckpointMarker;
     }
 
+    internal partial struct PhysicalDeviceDepthStencilResolvePropertiesKhr
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        /// <summary>
+        /// supported depth resolve modes
+        /// </summary>
+        internal ResolveModeFlagsKhr SupportedDepthResolveModes;
+        /// <summary>
+        /// supported stencil resolve modes
+        /// </summary>
+        internal ResolveModeFlagsKhr SupportedStencilResolveModes;
+        /// <summary>
+        /// depth and stencil resolve modes can be set independently if one of them is none
+        /// </summary>
+        internal Bool32 IndependentResolveNone;
+        /// <summary>
+        /// depth and stencil resolve modes can be set independently
+        /// </summary>
+        internal Bool32 IndependentResolve;
+    }
+
+    internal partial struct SubpassDescriptionDepthStencilResolveKhr
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        /// <summary>
+        /// depth resolve mode
+        /// </summary>
+        internal ResolveModeFlagsKhr DepthResolveMode;
+        /// <summary>
+        /// stencil resolve mode
+        /// </summary>
+        internal ResolveModeFlagsKhr StencilResolveMode;
+        /// <summary>
+        /// depth/stencil resolve attachment
+        /// </summary>
+        internal IntPtr DepthStencilResolveAttachment;
+    }
+
     internal partial struct ImageViewASTCDecodeModeExt
     {
         internal StructureType SType;
@@ -3866,6 +4001,38 @@ namespace Vulkan.Interop
         internal StructureType SType;
         internal IntPtr Next;
         internal Bool32 DecodeModeSharedExponent;
+    }
+
+    internal partial struct PhysicalDeviceTransformFeedbackFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 TransformFeedback;
+        internal Bool32 GeometryStreams;
+    }
+
+    internal partial struct PhysicalDeviceTransformFeedbackPropertiesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt32 MaxTransformFeedbackStreams;
+        internal UInt32 MaxTransformFeedbackBuffers;
+        internal DeviceSize MaxTransformFeedbackBufferSize;
+        internal UInt32 MaxTransformFeedbackStreamDataSize;
+        internal UInt32 MaxTransformFeedbackBufferDataSize;
+        internal UInt32 MaxTransformFeedbackBufferDataStride;
+        internal Bool32 TransformFeedbackQueries;
+        internal Bool32 TransformFeedbackStreamsLinesTriangles;
+        internal Bool32 TransformFeedbackRasterizationStreamSelect;
+        internal Bool32 TransformFeedbackDraw;
+    }
+
+    internal partial struct PipelineRasterizationStateStreamCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal PipelineRasterizationStateStreamCreateFlagsExt Flags;
+        internal UInt32 RasterizationStream;
     }
 
     internal partial struct PhysicalDeviceRepresentativeFragmentTestFeaturesNv
@@ -3924,6 +4091,13 @@ namespace Vulkan.Interop
         internal StructureType SType;
         internal IntPtr Next;
         internal Bool32 ImageFootprint;
+    }
+
+    internal partial struct PhysicalDeviceDedicatedAllocationImageAliasingFeaturesNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 DedicatedAllocationImageAliasing;
     }
 
     internal partial struct ShadingRatePaletteNv
@@ -4002,7 +4176,18 @@ namespace Vulkan.Interop
         internal UInt32 MeshOutputPerPrimitiveGranularity;
     }
 
-    internal partial struct RaytracingPipelineCreateInfoNvx
+    internal partial struct RayTracingShaderGroupCreateInfoNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal RayTracingShaderGroupTypeNv Type;
+        internal UInt32 GeneralShader;
+        internal UInt32 ClosestHitShader;
+        internal UInt32 AnyHitShader;
+        internal UInt32 IntersectionShader;
+    }
+
+    internal partial struct RayTracingPipelineCreateInfoNv
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -4015,10 +4200,8 @@ namespace Vulkan.Interop
         /// One entry for each active shader stage
         /// </summary>
         internal IntPtr Stages;
-        /// <summary>
-        /// One entry for each stage used as the query index and for grouping
-        /// </summary>
-        internal IntPtr GroupNumbers;
+        internal UInt32 GroupCount;
+        internal IntPtr Groups;
         internal UInt32 MaxRecursionDepth;
         /// <summary>
         /// Interface layout of the pipeline
@@ -4034,7 +4217,7 @@ namespace Vulkan.Interop
         internal Int32 BasePipelineIndex;
     }
 
-    internal partial struct GeometryTrianglesNvx
+    internal partial struct GeometryTrianglesNv
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -4042,9 +4225,6 @@ namespace Vulkan.Interop
         internal DeviceSize VertexOffset;
         internal UInt32 VertexCount;
         internal DeviceSize VertexStride;
-        /// <summary>
-        /// VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R16G16B16_SFLOAT, or VK_FORMAT_R16G16B16A16_SFLOAT
-        /// </summary>
         internal Format VertexFormat;
         internal UInt64 IndexData;
         internal DeviceSize IndexOffset;
@@ -4057,7 +4237,7 @@ namespace Vulkan.Interop
         internal DeviceSize TransformOffset;
     }
 
-    internal partial struct GeometryAABBNvx
+    internal partial struct GeometryAABBNv
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -4073,34 +4253,41 @@ namespace Vulkan.Interop
         internal DeviceSize Offset;
     }
 
-    internal partial struct GeometryDataNvx
+    internal partial struct GeometryDataNv
     {
-        internal GeometryTrianglesNvx Triangles;
-        internal GeometryAABBNvx Aabbs;
+        internal GeometryTrianglesNv Triangles;
+        internal GeometryAABBNv Aabbs;
     }
 
-    internal partial struct GeometryNvx
+    internal partial struct GeometryNv
     {
         internal StructureType SType;
         internal IntPtr Next;
-        internal GeometryTypeNvx GeometryType;
-        internal GeometryDataNvx Geometry;
-        internal GeometryFlagsNvx Flags;
+        internal GeometryTypeNv GeometryType;
+        internal GeometryDataNv Geometry;
+        internal GeometryFlagsNv Flags;
     }
 
-    internal partial struct AccelerationStructureCreateInfoNvx
+    internal partial struct AccelerationStructureInfoNv
     {
         internal StructureType SType;
         internal IntPtr Next;
-        internal AccelerationStructureTypeNvx Type;
-        internal BuildAccelerationStructureFlagsNvx Flags;
-        internal DeviceSize CompactedSize;
+        internal AccelerationStructureTypeNv Type;
+        internal BuildAccelerationStructureFlagsNv Flags;
         internal UInt32 InstanceCount;
         internal UInt32 GeometryCount;
         internal IntPtr Geometries;
     }
 
-    internal partial struct BindAccelerationStructureMemoryInfoNvx
+    internal partial struct AccelerationStructureCreateInfoNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal DeviceSize CompactedSize;
+        internal AccelerationStructureInfoNv Info;
+    }
+
+    internal partial struct BindAccelerationStructureMemoryInfoNv
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -4111,7 +4298,7 @@ namespace Vulkan.Interop
         internal IntPtr DeviceIndices;
     }
 
-    internal partial struct DescriptorAccelerationStructureInfoNvx
+    internal partial struct WriteDescriptorSetAccelerationStructureNv
     {
         internal StructureType SType;
         internal IntPtr Next;
@@ -4119,20 +4306,282 @@ namespace Vulkan.Interop
         internal IntPtr AccelerationStructures;
     }
 
-    internal partial struct AccelerationStructureMemoryRequirementsInfoNvx
+    internal partial struct AccelerationStructureMemoryRequirementsInfoNv
     {
         internal StructureType SType;
         internal IntPtr Next;
+        internal AccelerationStructureMemoryRequirementsTypeNv Type;
         internal UInt64 AccelerationStructure;
     }
 
-    internal partial struct PhysicalDeviceRaytracingPropertiesNvx
+    internal partial struct PhysicalDeviceRayTracingPropertiesNv
     {
         internal StructureType SType;
         internal IntPtr Next;
-        internal UInt32 ShaderHeaderSize;
+        internal UInt32 ShaderGroupHandleSize;
         internal UInt32 MaxRecursionDepth;
-        internal UInt32 MaxGeometryCount;
+        internal UInt32 MaxShaderGroupStride;
+        internal UInt32 ShaderGroupBaseAlignment;
+        internal UInt64 MaxGeometryCount;
+        internal UInt64 MaxInstanceCount;
+        internal UInt64 MaxTriangleCount;
+        internal UInt32 MaxDescriptorSetAccelerationStructures;
+    }
+
+    internal partial struct DrmFormatModifierPropertiesListExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt32 DrmFormatModifierCount;
+        internal IntPtr DrmFormatModifierProperties;
+    }
+
+    internal partial struct PhysicalDeviceImageDrmFormatModifierInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt64 DrmFormatModifier;
+        internal SharingMode SharingMode;
+        internal UInt32 QueueFamilyIndexCount;
+        internal IntPtr QueueFamilyIndices;
+    }
+
+    internal partial struct ImageDrmFormatModifierListCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt32 DrmFormatModifierCount;
+        internal IntPtr DrmFormatModifiers;
+    }
+
+    internal partial struct ImageDrmFormatModifierExplicitCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt64 DrmFormatModifier;
+        internal UInt32 DrmFormatModifierPlaneCount;
+        internal IntPtr PlaneLayouts;
+    }
+
+    internal partial struct ImageDrmFormatModifierPropertiesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt64 DrmFormatModifier;
+    }
+
+    internal partial struct ImageStencilUsageCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal ImageUsageFlags StencilUsage;
+    }
+
+    internal partial struct DeviceMemoryOverallocationCreateInfoAmd
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal MemoryOverallocationBehaviorAmd OverallocationBehavior;
+    }
+
+    internal partial struct PhysicalDeviceFragmentDensityMapFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 FragmentDensityMap;
+        internal Bool32 FragmentDensityMapDynamic;
+        internal Bool32 FragmentDensityMapNonSubsampledImages;
+    }
+
+    internal partial struct PhysicalDeviceFragmentDensityMapPropertiesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Extent2D MinFragmentDensityTexelSize;
+        internal Extent2D MaxFragmentDensityTexelSize;
+        internal Bool32 FragmentDensityInvocations;
+    }
+
+    internal partial struct RenderPassFragmentDensityMapCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal AttachmentReference FragmentDensityMapAttachment;
+    }
+
+    internal partial struct PhysicalDeviceScalarBlockLayoutFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 ScalarBlockLayout;
+    }
+
+    internal partial struct SurfaceProtectedCapabilitiesKhr
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        /// <summary>
+        /// Represents if surface can be protected
+        /// </summary>
+        internal Bool32 SupportsProtected;
+    }
+
+    internal partial struct PhysicalDeviceDepthClipEnableFeaturesExt
+    {
+        internal StructureType SType;
+        /// <summary>
+        /// Pointer to next structure
+        /// </summary>
+        internal IntPtr Next;
+        internal Bool32 DepthClipEnable;
+    }
+
+    internal partial struct PipelineRasterizationDepthClipStateCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal PipelineRasterizationDepthClipStateCreateFlagsExt Flags;
+        internal Bool32 DepthClipEnable;
+    }
+
+    internal partial struct PhysicalDeviceMemoryPriorityFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 MemoryPriority;
+    }
+
+    internal partial struct MemoryPriorityAllocateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal float Priority;
+    }
+
+    internal partial struct PhysicalDeviceBufferDeviceAddressFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 BufferDeviceAddress;
+        internal Bool32 BufferDeviceAddressCaptureReplay;
+        internal Bool32 BufferDeviceAddressMultiDevice;
+    }
+
+    internal partial struct BufferDeviceAddressInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt64 Buffer;
+    }
+
+    internal partial struct BufferDeviceAddressCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal DeviceAddress DeviceAddress;
+    }
+
+    internal partial struct PhysicalDeviceImageViewImageFormatInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal ImageViewType ImageViewType;
+    }
+
+    internal partial struct FilterCubicImageViewImageFormatPropertiesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 FilterCubic;
+        internal Bool32 FilterCubicMinmax;
+    }
+
+    internal partial struct PhysicalDeviceCooperativeMatrixFeaturesNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 CooperativeMatrix;
+        internal Bool32 CooperativeMatrixRobustBufferAccess;
+    }
+
+    internal partial struct PhysicalDeviceCooperativeMatrixPropertiesNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal ShaderStageFlags CooperativeMatrixSupportedStages;
+    }
+
+    internal partial struct CooperativeMatrixPropertiesNv
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt32 Msize;
+        internal UInt32 Nsize;
+        internal UInt32 Ksize;
+        internal ComponentTypeNv Atype;
+        internal ComponentTypeNv Btype;
+        internal ComponentTypeNv Ctype;
+        internal ComponentTypeNv Dtype;
+        internal ScopeNv Scope;
+    }
+
+    internal partial struct PhysicalDeviceYcbcrImageArraysFeaturesExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 YcbcrImageArrays;
+    }
+
+    internal partial struct ImageViewHandleInfoNvx
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal UInt64 ImageView;
+        internal DescriptorType DescriptorType;
+        internal UInt64 Sampler;
+    }
+
+    internal partial struct PipelineCreationFeedbackCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        /// <summary>
+        /// Output pipeline creation feedback.
+        /// </summary>
+        internal IntPtr PipelineCreationFeedback;
+        internal UInt32 PipelineStageCreationFeedbackCount;
+        /// <summary>
+        /// One entry for each shader stage specified in the parent Vk*PipelineCreateInfo struct
+        /// </summary>
+        internal IntPtr PipelineStageCreationFeedbacks;
+    }
+
+    internal partial struct SurfaceFullScreenExclusiveInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal FullScreenExclusiveExt FullScreenExclusive;
+    }
+
+    internal partial struct SurfaceFullScreenExclusiveWin32InfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal IntPtr Hmonitor;
+    }
+
+    internal partial struct SurfaceCapabilitiesFullScreenExclusiveExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal Bool32 FullScreenExclusiveSupported;
+    }
+
+    internal partial struct HeadlessSurfaceCreateInfoExt
+    {
+        internal StructureType SType;
+        internal IntPtr Next;
+        internal HeadlessSurfaceCreateFlagsExt Flags;
     }
 }
 

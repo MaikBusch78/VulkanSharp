@@ -434,7 +434,7 @@ namespace VulkanSharp.Generator
 
         void WriteEnum(EnumInfo currentEnumInfo, List<XElement> xAliases, bool bitmask, XElement xEnums)
         {
-            typesTranslation[currentEnumInfo.name] = currentEnumInfo.csName;
+            nativeTypesTranslation[currentEnumInfo.name] = currentEnumInfo.csName;
 
             WriteEnum(currentEnumInfo, bitmask, xEnums);
 
@@ -453,7 +453,7 @@ namespace VulkanSharp.Generator
 
                 if (WriteAliases) throw new NotImplementedException();
 
-                typesTranslation[aliasCurrentEnumInfo.name] = aliasCurrentEnumInfo.alias.csName;
+                nativeTypesTranslation[aliasCurrentEnumInfo.name] = aliasCurrentEnumInfo.alias.csName;
 
                 enumInfos[aliasCurrentEnumInfo.csName] = (EnumInfo)aliasCurrentEnumInfo.alias;
             }
@@ -579,7 +579,7 @@ namespace VulkanSharp.Generator
                 return false;
             }
 
-            typesTranslation[name] = csName;
+            nativeTypesTranslation[name] = csName;
 
             structures[csName] = new StructInfo() { name = name, csName = csName, needsMarshalling = LearnStructureMembers(xStruct), element = xStruct };
 
@@ -596,7 +596,7 @@ namespace VulkanSharp.Generator
 
                 if (WriteAliases) throw new NotImplementedException();
 
-                typesTranslation[aliasCurrentStructInfo.name] = aliasCurrentStructInfo.alias.csName;
+                nativeTypesTranslation[aliasCurrentStructInfo.name] = aliasCurrentStructInfo.alias.csName;
 
                 structures[aliasCurrentStructInfo.csName] = (StructInfo)aliasCurrentStructInfo.alias;
             }
@@ -727,10 +727,10 @@ namespace VulkanSharp.Generator
         {
             var name = xElement.Attribute("name").Value;
 
-            if (!typesTranslation.ContainsKey(name) || (platformExtensionsRequiredTypes != null && !platformExtensionsRequiredTypes.Contains(name)))
+            if (!nativeTypesTranslation.ContainsKey(name) || (platformExtensionsRequiredTypes != null && !platformExtensionsRequiredTypes.Contains(name)))
                 return;
 
-            var csName = typesTranslation[name];
+            var csName = nativeTypesTranslation[name];
             var info = structures[csName];
             needsMarshalling = info.needsMarshalling;
 
@@ -835,7 +835,7 @@ namespace VulkanSharp.Generator
 
                 if (isStruct && structextends != null)
                 {
-                    Console.WriteLine("error: structextends is not implemented for structs.");
+                    //Console.WriteLine("error: structextends is not implemented for structs.");
                 }
                 if (!isStruct)
                 {
@@ -923,12 +923,8 @@ namespace VulkanSharp.Generator
 
             currentStructInfo.members[csMemberName] = nameElement.Value;
 
-            var isCharArray = false;
-            if (csMemberType == "char" && InnerValue(memberElement).EndsWith("]"))
-                isCharArray = true;
-            string mod = "";
-            if (csMemberName.EndsWith("]"))
-                mod = "unsafe fixed ";
+            var isCharArray = csMemberType == "char" && InnerValue(memberElement).EndsWith("]");
+            var mod = csMemberName.EndsWith("]") ? "unsafe fixed " : "";
 
             csMemberType = GetFlagBitsName(csMemberType);
 
@@ -1443,7 +1439,15 @@ namespace VulkanSharp.Generator
                 if (hasSType)
                 {
                     var commentOut = csName == "BaseOutStructure" || csName == "BaseInStructure" ? "// " : "";
-                    writer.IndentWriteLine(commentOut + "M->SType = StructureType.{0};", csName);
+
+                    var csStructureTypeName = csName;
+
+                    //if (csName == "ImageDrmFormatModifierExplicitCreateInfoExt")
+                    //{
+                    //    csStructureTypeName = "ImageExcplicitDrmFormatModifierCreateInfoExt";
+                    //}
+
+                    writer.IndentWriteLine(commentOut + "M->SType = StructureType.{0};", csStructureTypeName);
                 }
 
                 foreach (var info in members)
@@ -1567,7 +1571,9 @@ namespace VulkanSharp.Generator
                 }
 
                 if (!isRequired)
+                {
                     return false;
+                }
             }
 
             var className = string.Format("{0}{1}", csName, isRequired ? "Extension" : "");
@@ -1728,6 +1734,9 @@ namespace VulkanSharp.Generator
             // TODO: PointerPointer to IntPtr-buffer
             "vkGetMemoryAndroidHardwareBufferANDROID",
             "vkCreateImagePipeSurfaceFUCHSIA",
+            // TODO: DisabledExtensions beachten
+            "vkCreateStreamDescriptorSurfaceGGP",
+            "vkCreateMetalSurfaceEXT",
         };
 
         HashSet<string> delegateUnmanagedCommands = new HashSet<string>
@@ -1844,303 +1853,320 @@ namespace VulkanSharp.Generator
                 return false;
             }
 
-            if (prependNewLine)
-                writer.WriteLine();
-
-            // todo: function pointers
-            if (csType.StartsWith("PFN_"))
-                csType = "IntPtr";
-
             string csFunction = function;
             if (function.StartsWith("vk"))
                 csFunction = csFunction.Substring(2);
 
-            if (isForHandle)
+            if (ignoredCommands.Contains(csFunction) == false)
             {
-                if (csFunction.StartsWith(handleName))
-                    csFunction = csFunction.Substring(handleName.Length);
-                else if (csFunction.StartsWith("Get" + handleName))
-                    csFunction = "Get" + csFunction.Substring(handleName.Length + 3);
-                else if (csFunction.EndsWith(handleName))
-                    csFunction = csFunction.Substring(0, csFunction.Length - handleName.Length);
-            }
+                if (prependNewLine)
+                    writer.WriteLine();
 
-            if (!useArrayParameters && csFunction.EndsWith("s"))
-                csFunction = csFunction.Substring(0, csFunction.Length - 1);
+                // todo: function pointers
+                if (csType.StartsWith("PFN_"))
+                    csType = "IntPtr";
 
-            int fixedCount, outCount;
-            var paramsDict = LearnParams(commandElement, isForHandle && !isExtension, out fixedCount, out outCount);
-
-            var hasResult = csType == "Result";
-            if (hasResult)
-                csType = "void";
-
-            ParamInfo firstOutParam = null;
-            ParamInfo intParam = null;
-            string outLen = null;
-            ParamInfo dataParam = null;
-            var ignoredParameters = new List<ParamInfo>();
-            bool createArray = false;
-            bool hasLen = false;
-            if (csType == "void")
-            {
-                if (outCount == 1)
+                if (isForHandle)
                 {
-                    foreach (var param in paramsDict)
+                    if (csFunction.StartsWith(handleName))
+                        csFunction = csFunction.Substring(handleName.Length);
+                    else if (csFunction.StartsWith("Get" + handleName))
+                        csFunction = "Get" + csFunction.Substring(handleName.Length + 3);
+                    else if (csFunction.EndsWith(handleName))
+                        csFunction = csFunction.Substring(0, csFunction.Length - handleName.Length);
+                }
+
+                if (!useArrayParameters && csFunction.EndsWith("s"))
+                {
+                    csFunction = csFunction.Substring(0, csFunction.Length - "s".Length);
+                }
+                foreach (var specPart in specialParts.Keys)
+                {
+                    if (!useArrayParameters && csFunction.EndsWith("s" + specPart))
                     {
-                        if (param.Value.isOut)
+                        csFunction = csFunction.Substring(0, csFunction.Length - ("s" + specPart).Length) + specPart;
+                    }
+                }
+
+                int fixedCount, outCount;
+                var paramsDict = LearnParams(commandElement, isForHandle && !isExtension, out fixedCount, out outCount);
+
+                var hasResult = csType == "Result";
+                if (hasResult)
+                    csType = "void";
+
+                ParamInfo firstOutParam = null;
+                ParamInfo intParam = null;
+                string outLen = null;
+                ParamInfo dataParam = null;
+                var ignoredParameters = new List<ParamInfo>();
+                bool createArray = false;
+                bool hasLen = false;
+                if (csType == "void")
+                {
+                    if (outCount == 1)
+                    {
+                        foreach (var param in paramsDict)
                         {
-                            firstOutParam = param.Value;
-                            switch (firstOutParam.csType)
+                            if (param.Value.isOut)
                             {
-                                case "Bool32":
-                                case "IntPtr":
-                                case "int":
-                                case "Int32":
-                                case "UInt32":
-                                case "Int64":
-                                case "UInt64":
-                                case "DeviceSize":
-                                    firstOutParam.isFixed = false;
-                                    break;
+                                firstOutParam = param.Value;
+                                switch (firstOutParam.csType)
+                                {
+                                    case "Bool32":
+                                    case "IntPtr":
+                                    case "int":
+                                    case "Int32":
+                                    case "UInt32":
+                                    case "Int64":
+                                    case "UInt64":
+                                    case "DeviceSize":
+                                    case "DeviceAddress":
+                                        firstOutParam.isFixed = false;
+                                        break;
+                                }
+                                ignoredParameters.Add(param.Value);
+                                break;
                             }
-                            ignoredParameters.Add(param.Value);
-                            break;
                         }
-                    }
-                    csType = firstOutParam.csType;
-                    if (csType != "IntPtr" && firstOutParam.len != null /* && paramsDict.ContainsKey (firstOutParam.len) */)
-                    {
-                        csType += "[]";
-                        createArray = true;
-                        hasLen = true;
-                        intParam = paramsDict.ContainsKey(firstOutParam.len) ? paramsDict[firstOutParam.len] : GetLenParamInfo(firstOutParam.len);
-                        dataParam = firstOutParam;
-                        intParam.isFixed = false;
-                        dataParam.isFixed = false;
-                    }
-                }
-                else
-                if (outCount > 1)
-                {
-                    createArray = CommandShouldCreateArray(commandElement, paramsDict, ref intParam, ref dataParam);
-                    if (createArray)
-                    {
-                        ignoredParameters.Add(intParam);
-                        ignoredParameters.Add(dataParam);
-                        intParam.isFixed = false;
-                        dataParam.isFixed = false;
-                        csType = string.Format("{0}[]", dataParam.csType);
-                    }
-                }
-            }
-
-            if (intParam != null)
-                outLen = intParam.csName;
-
-            int arrayParamCount = 0;
-            foreach (var param in paramsDict)
-            {
-                var info = param.Value;
-                if (info.len != null && paramsDict.ContainsKey(info.len) && !info.isOut && info.csType != "IntPtr")
-                {
-                    var lenParameter = paramsDict[info.len];
-                    ignoredParameters.Add(lenParameter);
-                    lenParameter.lenArray = info;
-                    if (useArrayParameters)
-                    {
-                        info.isArray = true;
-                        if (lenParameter.csName == outLen)
-                            outLen = string.Format("{0}.Length", info.csName);
-                        info.isFixed = false;
-                        arrayParamCount++;
+                        csType = firstOutParam.csType;
+                        if (csType != "IntPtr" && firstOutParam.len != null /* && paramsDict.ContainsKey (firstOutParam.len) */)
+                        {
+                            csType += "[]";
+                            createArray = true;
+                            hasLen = true;
+                            intParam = paramsDict.ContainsKey(firstOutParam.len) ? paramsDict[firstOutParam.len] : GetLenParamInfo(firstOutParam.len);
+                            dataParam = firstOutParam;
+                            intParam.isFixed = false;
+                            dataParam.isFixed = false;
+                        }
                     }
                     else
+                    if (outCount > 1)
                     {
-                        lenParameter.constValue = "1";
-                        if (info.isStruct && !info.needsMarshalling)
-                            info.isNullable = true;
-                        else
-                            switch (info.csType)
-                            {
-                                case "UInt32":
-                                case "Int32":
-                                case "UInt64":
-                                case "Int64":
-                                    info.isNullable = true;
-                                    break;
-                            }
+                        createArray = CommandShouldCreateArray(commandElement, paramsDict, ref intParam, ref dataParam);
+                        if (createArray)
+                        {
+                            ignoredParameters.Add(intParam);
+                            ignoredParameters.Add(dataParam);
+                            intParam.isFixed = false;
+                            dataParam.isFixed = false;
+                            csType = string.Format("{0}[]", dataParam.csType);
+                        }
                     }
                 }
-            }
 
-            if (intParam != null)
-                intParam.isOut = false;
-            if (dataParam != null)
-                dataParam.isOut = false;
+                if (intParam != null)
+                    outLen = intParam.csName;
 
-            writer.IndentWrite("public {0}{1} {2} (", (!isExtension && isForHandle) ? "" : "static ", csType, csFunction);
-            hasArrayParameter = WriteCommandParameters(commandElement, useArrayParameters, ignoredParameters, null, null, isForHandle && !isExtension, false, paramsDict, isExtension, true);
-            writer.WriteLine(")");
-            writer.IndentWriteLineBraceOpen();
-            {
-                if (hasResult)
-                    writer.IndentWriteLine("Result result;");
-                if (firstOutParam != null && !hasLen)
-                    writer.IndentWriteLine("{0} {1};", csType, firstOutParam.csName);
-                writer.IndentWriteLine("unsafe");
+                int arrayParamCount = 0;
+                foreach (var param in paramsDict)
+                {
+                    var info = param.Value;
+                    if (info.len != null && paramsDict.ContainsKey(info.len) && !info.isOut && info.csType != "IntPtr")
+                    {
+                        var lenParameter = paramsDict[info.len];
+                        ignoredParameters.Add(lenParameter);
+                        lenParameter.lenArray = info;
+                        if (useArrayParameters)
+                        {
+                            info.isArray = true;
+                            if (lenParameter.csName == outLen)
+                                outLen = string.Format("{0}.Length", info.csName);
+                            info.isFixed = false;
+                            arrayParamCount++;
+                        }
+                        else
+                        {
+                            lenParameter.constValue = "1";
+                            if (info.isStruct && !info.needsMarshalling)
+                                info.isNullable = true;
+                            else
+                                switch (info.csType)
+                                {
+                                    case "UInt32":
+                                    case "Int32":
+                                    case "UInt64":
+                                    case "Int64":
+                                        info.isNullable = true;
+                                        break;
+                                }
+                        }
+                    }
+                }
+
+                if (intParam != null)
+                    intParam.isOut = false;
+                if (dataParam != null)
+                    dataParam.isOut = false;
+
+                writer.IndentWrite("public {0}{1} {2} (", (!isExtension && isForHandle) ? "" : "static ", csType, csFunction);
+                hasArrayParameter = WriteCommandParameters(commandElement, useArrayParameters, ignoredParameters, null, null, isForHandle && !isExtension, false, paramsDict, isExtension, true);
+                writer.WriteLine(")");
                 writer.IndentWriteLineBraceOpen();
                 {
-                    bool isInInterop = false;
-                    if (createArray)
+                    if (hasResult)
+                        writer.IndentWriteLine("Result result;");
+                    if (firstOutParam != null && !hasLen)
+                        writer.IndentWriteLine("{0} {1};", csType, firstOutParam.csName);
+                    writer.IndentWriteLine("unsafe");
+                    writer.IndentWriteLineBraceOpen();
                     {
-                        isInInterop = dataParam.isStruct && dataParam.needsMarshalling;
-                        if (!hasLen)
+                        bool isInInterop = false;
+                        if (createArray)
                         {
-                            writer.IndentWriteLine("UInt32 {0};", outLen);
-                            writer.IndentWrite("{0}{1}{2}{3} (", hasResult ? "result = " : "", (ignoredParameters.Count == 0 && csType != "void") ? "return " : "", delegateUnmanagedCommands.Contains(function) ? "" : "Interop.NativeMethods.", function);
-                            WriteCommandParameters(commandElement, useArrayParameters, null, dataParam, null, isForHandle && !isExtension, true, paramsDict, isExtension);
-                            writer.WriteLine(");");
-                            CommandHandleResult(hasResult);
-                        }
-                        writer.IndentWriteLine("if ({0} <= 0)", outLen);
-                        writer.IndentLevel++;
-                        writer.IndentWriteLine("return null;");
-                        writer.IndentLevel--;
-                        writer.WriteLine();
-                        writer.IndentWriteLine("int size = {0};", dataParam.MarshalSizeSource(this, isInInterop));
-                        writer.IndentWriteLine("var ref{0} = new NativeReference ((int)(size * {1}));", dataParam.csName, outLen);
-                        writer.IndentWriteLine("var ptr{0} = ref{0}.Handle;", dataParam.csName);
-                    }
-
-                    if (fixedCount > 0)
-                    {
-                        int count = 0;
-                        foreach (var param in paramsDict)
-                        {
-                            if (param.Value.isFixed && param.Value.isHandle && !param.Value.isConst)
+                            isInInterop = dataParam.isStruct && dataParam.needsMarshalling;
+                            if (!hasLen)
                             {
-                                writer.IndentWriteLine("{0} = new {1} ();", param.Key, param.Value.csType);
-                                count++;
+                                writer.IndentWriteLine("UInt32 {0};", outLen);
+                                writer.IndentWrite("{0}{1}{2}{3} (", hasResult ? "result = " : "", (ignoredParameters.Count == 0 && csType != "void") ? "return " : "", delegateUnmanagedCommands.Contains(function) ? "" : "Interop.NativeMethods.", function);
+                                WriteCommandParameters(commandElement, useArrayParameters, null, dataParam, null, isForHandle && !isExtension, true, paramsDict, isExtension);
+                                writer.WriteLine(");");
+                                CommandHandleResult(hasResult);
                             }
-                        }
-                        if (count > 0)
+                            writer.IndentWriteLine("if ({0} <= 0)", outLen);
+                            writer.IndentLevel++;
+                            writer.IndentWriteLine("return null;");
+                            writer.IndentLevel--;
                             writer.WriteLine();
+                            writer.IndentWriteLine("int size = {0};", dataParam.MarshalSizeSource(this, isInInterop));
+                            writer.IndentWriteLine("var ref{0} = new NativeReference ((int)(size * {1}));", dataParam.csName, outLen);
+                            writer.IndentWriteLine("var ptr{0} = ref{0}.Handle;", dataParam.csName);
+                        }
 
-                        foreach (var param in paramsDict)
+                        if (fixedCount > 0)
                         {
-                            if (param.Value.isFixed)
+                            int count = 0;
+                            foreach (var param in paramsDict)
                             {
-                                writer.IndentWriteLine("fixed ({0}* ptr{1} = &{1}{2})", GetManagedType(param.Value.csType), GetParamName(param.Key, useArrayParameters), param.Value.isHandle ? ".M" : "");
-                                writer.IndentWriteLineBraceOpen();
+                                if (param.Value.isFixed && param.Value.isHandle && !param.Value.isConst)
+                                {
+                                    writer.IndentWriteLine("{0} = new {1} ();", param.Key, param.Value.csType);
+                                    count++;
+                                }
+                            }
+                            if (count > 0)
+                                writer.WriteLine();
+
+                            foreach (var param in paramsDict)
+                            {
+                                if (param.Value.isFixed)
+                                {
+                                    writer.IndentWriteLine("fixed ({0}* ptr{1} = &{1}{2})", GetManagedType(param.Value.csType), GetParamName(param.Key, useArrayParameters), param.Value.isHandle ? ".M" : "");
+                                    writer.IndentWriteLineBraceOpen();
+                                }
                             }
                         }
-                    }
-                    {
-                        if (outCount > 0)
                         {
+                            if (outCount > 0)
+                            {
+                                foreach (var param in paramsDict)
+                                {
+                                    var info = param.Value;
+                                    if (info.isOut && !info.isFixed) // && (ignoredParameters == null || !ignoredParameters.Contains (info)))
+                                        writer.IndentWriteLine("{0} = new {1} ();", param.Key, info.csType);
+                                }
+                            }
+                            if (arrayParamCount > 0)
+                            {
+                                foreach (var param in paramsDict)
+                                {
+                                    var info = param.Value;
+                                    if (info.len != null && firstOutParam != info)
+                                    {
+                                        writer.IndentWriteLine("var array{0} = {0} == null ? IntPtr.Zero : Marshal.AllocHGlobal ({0}.Length * sizeof ({1}));", info.csName, GetParamArrayType(info));
+                                        writer.IndentWriteLine("var len{0} = {0} == null ? 0 : {0}.Length;", info.csName);
+                                        writer.IndentWriteLine("if ({0} != null)", info.csName);
+                                        writer.IndentLevel++;
+                                        writer.IndentWriteLine("for (int i = 0; i < {0}.Length; i++)", info.csName);
+                                        writer.IndentLevel++;
+                                        writer.IndentWriteLine("(({0}*)array{1}) [i] = {3}({1} [i]{2});", GetParamArrayType(info), info.csName, ((info.isStruct && info.needsMarshalling) || info.isHandle) ? ".M" : "", (info.isStruct && info.needsMarshalling) ? "*" : "");
+                                        writer.IndentLevel--;
+                                        writer.IndentLevel--;
+                                    }
+                                }
+                            }
                             foreach (var param in paramsDict)
                             {
                                 var info = param.Value;
-                                if (info.isOut && !info.isFixed) // && (ignoredParameters == null || !ignoredParameters.Contains (info)))
-                                    writer.IndentWriteLine("{0} = new {1} ();", param.Key, info.csType);
+                                if (info.isNullable)
+                                {
+                                    string name = GetParamName(info.csName, useArrayParameters);
+                                    writer.IndentWriteLine("{0} val{1} = {1} ?? default({0});", info.csType, name);
+                                    writer.IndentWriteLine("{0}* ptr{1} = {1} != null ? &val{1} : ({0}*)IntPtr.Zero;", info.csType, name);
+                                }
+                            }
+
+                            writer.IndentWrite("{0}{1}{2}{3} (", hasResult ? "result = " : "", (ignoredParameters.Count == 0 && csType != "void") ? "return " : "", delegateUnmanagedCommands.Contains(function) ? "" : string.Format("{0}.NativeMethods.", InteropNamespace), function);
+                            WriteCommandParameters(commandElement, useArrayParameters, null, null, dataParam, isForHandle && !isExtension, true, paramsDict, isExtension);
+                            writer.WriteLine(");");
+                        }
+                        if (fixedCount > 0)
+                        {
+                            foreach (var param in paramsDict)
+                            {
+                                if (param.Value.isFixed)
+                                {
+                                    writer.IndentWriteLineBraceClose();
+                                }
                             }
                         }
+
                         if (arrayParamCount > 0)
                         {
                             foreach (var param in paramsDict)
                             {
                                 var info = param.Value;
                                 if (info.len != null && firstOutParam != info)
+                                    writer.IndentWriteLine("Marshal.FreeHGlobal (array{0});", info.csName);
+                            }
+                        }
+                        CommandHandleResult(hasResult);
+                        if (firstOutParam != null && !createArray)
+                        {
+                            writer.WriteLine();
+                            writer.IndentWriteLine("return {0};", firstOutParam.csName);
+                        }
+                        else if (createArray)
+                        {
+                            writer.WriteLine();
+                            writer.IndentWriteLine("if ({0} <= 0)", outLen);
+                            writer.IndentLevel++;
+                            writer.IndentWriteLine("return null;");
+                            writer.IndentLevel--;
+                            writer.IndentWriteLine("var arr = new {0} [{1}];", dataParam.csType, outLen);
+                            writer.IndentWriteLine("for (int i = 0; i < {0}; i++)", outLen);
+                            writer.IndentWriteLineBraceOpen();
+                            {
+                                if (isInInterop || !dataParam.isStruct)
                                 {
-                                    writer.IndentWriteLine("var array{0} = {0} == null ? IntPtr.Zero : Marshal.AllocHGlobal ({0}.Length * sizeof ({1}));", info.csName, GetParamArrayType(info));
-                                    writer.IndentWriteLine("var len{0} = {0} == null ? 0 : {0}.Length;", info.csName);
-                                    writer.IndentWriteLine("if ({0} != null)", info.csName);
-                                    writer.IndentLevel++;
-                                    writer.IndentWriteLine("for (int i = 0; i < {0}.Length; i++)", info.csName);
-                                    writer.IndentLevel++;
-                                    writer.IndentWriteLine("(({0}*)array{1}) [i] = {3}({1} [i]{2});", GetParamArrayType(info), info.csName, ((info.isStruct && info.needsMarshalling) || info.isHandle) ? ".M" : "", (info.isStruct && info.needsMarshalling) ? "*" : "");
-                                    writer.IndentLevel--;
-                                    writer.IndentLevel--;
+                                    if (dataParam.isStruct)
+                                        writer.IndentWriteLine("arr [i] = new {0} (new NativePointer (ref{4}, (IntPtr)({1}(({2}{3}*)ptr{4}) [i])));", dataParam.csType, dataParam.isStruct ? "&" : "", isInInterop ? "Interop." : "", dataParam.isHandle ? GetHandleType(handles[dataParam.csType]) : dataParam.csType, dataParam.csName);
+                                    else
+                                    {
+                                        writer.IndentWriteLine("arr [i] = new {0} ();", dataParam.csType);
+                                        writer.IndentWriteLine("arr [i]{0} = {1}(({2}{3}*)ptr{4}) [i];", (dataParam.isStruct || dataParam.isHandle) ? ".M" : "", dataParam.isStruct ? "&" : "", isInInterop ? "Interop." : "", dataParam.isHandle ? GetHandleType(handles[dataParam.csType]) : dataParam.csType, dataParam.csName);
+                                    }
                                 }
-                            }
-                        }
-                        foreach (var param in paramsDict)
-                        {
-                            var info = param.Value;
-                            if (info.isNullable)
-                            {
-                                string name = GetParamName(info.csName, useArrayParameters);
-                                writer.IndentWriteLine("{0} val{1} = {1} ?? default({0});", info.csType, name);
-                                writer.IndentWriteLine("{0}* ptr{1} = {1} != null ? &val{1} : ({0}*)IntPtr.Zero;", info.csType, name);
-                            }
-                        }
-
-                        writer.IndentWrite("{0}{1}{2}{3} (", hasResult ? "result = " : "", (ignoredParameters.Count == 0 && csType != "void") ? "return " : "", delegateUnmanagedCommands.Contains(function) ? "" : string.Format("{0}.NativeMethods.", InteropNamespace), function);
-                        WriteCommandParameters(commandElement, useArrayParameters, null, null, dataParam, isForHandle && !isExtension, true, paramsDict, isExtension);
-                        writer.WriteLine(");");
-                    }
-                    if (fixedCount > 0)
-                    {
-                        foreach (var param in paramsDict)
-                        {
-                            if (param.Value.isFixed)
-                            {
-                                writer.IndentWriteLineBraceClose();
-                            }
-                        }
-                    }
-
-                    if (arrayParamCount > 0)
-                    {
-                        foreach (var param in paramsDict)
-                        {
-                            var info = param.Value;
-                            if (info.len != null && firstOutParam != info)
-                                writer.IndentWriteLine("Marshal.FreeHGlobal (array{0});", info.csName);
-                        }
-                    }
-                    CommandHandleResult(hasResult);
-                    if (firstOutParam != null && !createArray)
-                    {
-                        writer.WriteLine();
-                        writer.IndentWriteLine("return {0};", firstOutParam.csName);
-                    }
-                    else if (createArray)
-                    {
-                        writer.WriteLine();
-                        writer.IndentWriteLine("if ({0} <= 0)", outLen);
-                        writer.IndentLevel++;
-                        writer.IndentWriteLine("return null;");
-                        writer.IndentLevel--;
-                        writer.IndentWriteLine("var arr = new {0} [{1}];", dataParam.csType, outLen);
-                        writer.IndentWriteLine("for (int i = 0; i < {0}; i++)", outLen);
-                        writer.IndentWriteLineBraceOpen();
-                        {
-                            if (isInInterop || !dataParam.isStruct)
-                            {
-                                if (dataParam.isStruct)
-                                    writer.IndentWriteLine("arr [i] = new {0} (new NativePointer (ref{4}, (IntPtr)({1}(({2}{3}*)ptr{4}) [i])));", dataParam.csType, dataParam.isStruct ? "&" : "", isInInterop ? "Interop." : "", dataParam.isHandle ? GetHandleType(handles[dataParam.csType]) : dataParam.csType, dataParam.csName);
                                 else
-                                {
-                                    writer.IndentWriteLine("arr [i] = new {0} ();", dataParam.csType);
-                                    writer.IndentWriteLine("arr [i]{0} = {1}(({2}{3}*)ptr{4}) [i];", (dataParam.isStruct || dataParam.isHandle) ? ".M" : "", dataParam.isStruct ? "&" : "", isInInterop ? "Interop." : "", dataParam.isHandle ? GetHandleType(handles[dataParam.csType]) : dataParam.csType, dataParam.csName);
-                                }
+                                    writer.IndentWriteLine("arr [i] = ((({0}*)ptr{1}) [i]);", dataParam.csType, dataParam.csName);
                             }
-                            else
-                                writer.IndentWriteLine("arr [i] = ((({0}*)ptr{1}) [i]);", dataParam.csType, dataParam.csName);
+                            writer.IndentWriteLineBraceClose();
+                            writer.WriteLine();
+                            writer.IndentWriteLine("return arr;");
                         }
-                        writer.IndentWriteLineBraceClose();
-                        writer.WriteLine();
-                        writer.IndentWriteLine("return arr;");
                     }
+                    writer.IndentWriteLineBraceClose();
                 }
                 writer.IndentWriteLineBraceClose();
             }
-            writer.IndentWriteLineBraceClose();
+
+            hasArrayParameter |= ignoredCommandsHasArrayParameter.Contains(csFunction);
 
             if (useArrayParameters && hasArrayParameter && !ignoredSimplifiedCommands.Contains(csFunction))
+            {
                 return WriteCommand(commandElement, true, false, isForHandle, handleName, isExtension);
+            }
 
             return true;
         }
@@ -2149,11 +2175,23 @@ namespace VulkanSharp.Generator
         {
             "vkCreateInstance"
         };
+        HashSet<string> ignoredCommands = new HashSet<string>
+        {
+            "GetCalibratedTimestampsEXT",
+        };
+        HashSet<string> ignoredCommandsHasArrayParameter = new HashSet<string>
+        {
+            "GetCalibratedTimestampsEXT",
+        };
         HashSet<string> ignoredSimplifiedCommands = new HashSet<string>
         {
             "CreateGraphicsPipelines",
             "CreateComputePipelines",
             "CreateSharedSwapchainsKHR",
+            "CmdBindTransformFeedbackBuffersEXT",
+            "CmdBeginTransformFeedbackEXT",
+            "CmdEndTransformFeedbackEXT",
+            "CreateRayTracingPipelinesNV",
         };
         HashSet<string> notLengthTypes = new HashSet<string>
         {
@@ -2277,7 +2315,9 @@ namespace VulkanSharp.Generator
 
                 var info = paramsDict[name];
                 if (info.csType == "UInt32" && !notLengthTypes.Contains(info.type))
+                {
                     outUInt = info;
+                }
                 else
                 {
                     if (outUInt != null && info.isOut && (info.isStruct || info.isHandle || info.isPointer))
@@ -2531,6 +2571,11 @@ namespace VulkanSharp.Generator
         HashSet<string> disabledExtensions = new HashSet<string>()
         {
             "VK_FUCHSIA_imagepipe_surface",
+            "VK_GGP_frame_token",
+            "VK_GGP_stream_descriptor_surface",
+            "VK_EXT_metal_surface",
+            // TODO: include
+            "VK_EXT_memory_budget",
         };
 
         void GeneratePlatformExtensions()
@@ -2556,7 +2601,6 @@ namespace VulkanSharp.Generator
                     "VK_KHR_xlib_surface",
                     "VK_KHR_xcb_surface",
                     "VK_KHR_wayland_surface",
-                    "VK_KHR_mir_surface"
                 }
             },
             {
@@ -2586,7 +2630,9 @@ namespace VulkanSharp.Generator
             platformExtensionsRequiredCommands = new HashSet<string>();
 
             foreach (var extensionName in extensionNames)
+            {
                 PrepareExtensionSets(extensionName);
+            }
 
             LearnStructsAndUnions();
             GenerateFileStructsCs();

@@ -538,7 +538,7 @@ namespace Vulkan
     }
 
     [Flags]
-    public enum GeometryFlagsNvx : uint
+    public enum GeometryFlagsNv : uint
     {
         None = 0,
         Opaque = 0x1,
@@ -546,17 +546,17 @@ namespace Vulkan
     }
 
     [Flags]
-    public enum GeometryInstanceFlagsNvx : uint
+    public enum GeometryInstanceFlagsNv : uint
     {
         None = 0,
         TriangleCullDisable = 0x1,
-        TriangleCullFlipWinding = 0x2,
+        TriangleFrontCounterclockwise = 0x2,
         ForceOpaque = 0x4,
         ForceNoOpaque = 0x8,
     }
 
     [Flags]
-    public enum BuildAccelerationStructureFlagsNvx : uint
+    public enum BuildAccelerationStructureFlagsNv : uint
     {
         None = 0,
         AllowUpdate = 0x1,
@@ -570,6 +570,15 @@ namespace Vulkan
     public enum DescriptorUpdateTemplateCreateFlags : uint
     {
         None = 0,
+    }
+
+    [Flags]
+    public enum PipelineCreationFeedbackFlagsExt : uint
+    {
+        None = 0,
+        Valid = 0x1,
+        ApplicationPipelineCacheHit = 0x2,
+        BasePipelineAcceleration = 0x4,
     }
 
     [Flags]
@@ -632,12 +641,6 @@ namespace Vulkan
     }
 
     [Flags]
-    public enum MirSurfaceCreateFlagsKhr : uint
-    {
-        None = 0,
-    }
-
-    [Flags]
     public enum ViSurfaceCreateFlagsNn : uint
     {
         None = 0,
@@ -680,7 +683,25 @@ namespace Vulkan
     }
 
     [Flags]
+    public enum MetalSurfaceCreateFlagsExt : uint
+    {
+        None = 0,
+    }
+
+    [Flags]
     public enum ImagePipeSurfaceCreateFlagsFuchsia : uint
+    {
+        None = 0,
+    }
+
+    [Flags]
+    public enum StreamDescriptorSurfaceCreateFlagsGgp : uint
+    {
+        None = 0,
+    }
+
+    [Flags]
+    public enum HeadlessSurfaceCreateFlagsExt : uint
     {
         None = 0,
     }
@@ -912,6 +933,29 @@ namespace Vulkan
         Inverted = 0x1,
     }
 
+    [Flags]
+    public enum ResolveModeFlagsKhr : uint
+    {
+        None = 0,
+        NoneKhr = 0,
+        SampleZero = 0x1,
+        Average = 0x2,
+        Min = 0x4,
+        Max = 0x8,
+    }
+
+    [Flags]
+    public enum PipelineRasterizationStateStreamCreateFlagsExt : uint
+    {
+        None = 0,
+    }
+
+    [Flags]
+    public enum PipelineRasterizationDepthClipStateCreateFlagsExt : uint
+    {
+        None = 0,
+    }
+
     public enum AttachmentLoadOp : int
     {
         Load = 0,
@@ -1021,10 +1065,6 @@ namespace Vulkan
     {
     }
 
-    public enum SamplerCreateFlagBits : int
-    {
-    }
-
     public enum PipelineCacheHeaderVersion : int
     {
         One = 1,
@@ -1129,7 +1169,7 @@ namespace Vulkan
         StorageBufferDynamic = 9,
         InputAttachment = 10,
         InlineUniformBlockExt = 1000138000,
-        AccelerationStructureNvx = 1000165000,
+        AccelerationStructureNv = 1000165000,
     }
 
     public enum DeviceCreateFlagBits : int
@@ -1416,12 +1456,14 @@ namespace Vulkan
         PresentSrcKhr = 1000001002,
         SharedPresentKhr = 1000111000,
         ShadingRateOptimalNv = 1000164003,
+        FragmentDensityMapOptimalExt = 1000218000,
     }
 
     public enum ImageTiling : int
     {
         Optimal = 0,
         Linear = 1,
+        DrmFormatModifierExt = 1000158000,
     }
 
     public enum ImageType : int
@@ -1452,6 +1494,7 @@ namespace Vulkan
     {
         Uint16 = 0,
         Uint32 = 1,
+        NoneNv = 1000165000,
     }
 
     public enum LogicOp : int
@@ -1487,7 +1530,7 @@ namespace Vulkan
     {
         Graphics = 0,
         Compute = 1,
-        RaytracingNvx = 1000165000,
+        RayTracingNv = 1000165000,
     }
 
     public enum PrimitiveTopology : int
@@ -1510,7 +1553,8 @@ namespace Vulkan
         Occlusion = 0,
         PipelineStatistics = 1,
         Timestamp = 2,
-        CompactedSizeNvx = 1000165000,
+        TransformFeedbackStreamExt = 1000028004,
+        AccelerationStructureCompactedSizeNv = 1000165000,
     }
 
     public enum SubpassContents : int
@@ -1548,8 +1592,11 @@ namespace Vulkan
         ErrorIncompatibleDisplayKhr = -1000003001,
         ErrorValidationFailedExt = -1000011001,
         ErrorInvalidShaderNv = -1000012000,
+        ErrorInvalidDrmFormatModifierPlaneLayoutExt = -1000158000,
         ErrorFragmentationExt = -1000161000,
         ErrorNotPermittedExt = -1000174001,
+        ErrorInvalidDeviceAddressExt = -1000244000,
+        ErrorFullScreenExclusiveModeLostExt = -1000255000,
     }
 
     public enum StencilOp : int
@@ -1651,7 +1698,7 @@ namespace Vulkan
         RenderPassMultiviewCreateInfo = 1000053000,
         PhysicalDeviceMultiviewFeatures = 1000053001,
         PhysicalDeviceMultiviewProperties = 1000053002,
-        PhysicalDeviceVariablePointerFeatures = 1000120000,
+        PhysicalDeviceVariablePointersFeatures = 1000120000,
         ProtectedSubmitInfo = 1000145000,
         PhysicalDeviceProtectedMemoryFeatures = 1000145001,
         PhysicalDeviceProtectedMemoryProperties = 1000145002,
@@ -1679,7 +1726,7 @@ namespace Vulkan
         ExternalSemaphoreProperties = 1000076001,
         PhysicalDeviceMaintenance3Properties = 1000168000,
         DescriptorSetLayoutSupport = 1000168001,
-        PhysicalDeviceShaderDrawParameterFeatures = 1000063000,
+        PhysicalDeviceShaderDrawParametersFeatures = 1000063000,
         SwapchainCreateInfoKhr = 1000001000,
         PresentInfoKhr = 1000001001,
         DeviceGroupPresentCapabilitiesKhr = 1000060007,
@@ -1694,7 +1741,6 @@ namespace Vulkan
         XlibSurfaceCreateInfoKhr = 1000004000,
         XcbSurfaceCreateInfoKhr = 1000005000,
         WaylandSurfaceCreateInfoKhr = 1000006000,
-        MirSurfaceCreateInfoKhr = 1000007000,
         AndroidSurfaceCreateInfoKhr = 1000008000,
         Win32SurfaceCreateInfoKhr = 1000009000,
         DebugReportCallbackCreateInfoExt = 1000011000,
@@ -1705,7 +1751,12 @@ namespace Vulkan
         DedicatedAllocationImageCreateInfoNv = 1000026000,
         DedicatedAllocationBufferCreateInfoNv = 1000026001,
         DedicatedAllocationMemoryAllocateInfoNv = 1000026002,
+        PhysicalDeviceTransformFeedbackFeaturesExt = 1000028000,
+        PhysicalDeviceTransformFeedbackPropertiesExt = 1000028001,
+        PipelineRasterizationStateStreamCreateInfoExt = 1000028002,
+        ImageViewHandleInfoNvx = 1000030000,
         TextureLODGatherFormatPropertiesAmd = 1000041000,
+        StreamDescriptorSurfaceCreateInfoGgp = 1000049000,
         PhysicalDeviceCornerSampledImageFeaturesNv = 1000050000,
         ExternalMemoryImageCreateInfoNv = 1000056000,
         ExportMemoryAllocateInfoNv = 1000056001,
@@ -1734,6 +1785,7 @@ namespace Vulkan
         CommandBufferInheritanceConditionalRenderingInfoExt = 1000081000,
         PhysicalDeviceConditionalRenderingFeaturesExt = 1000081001,
         ConditionalRenderingBeginInfoExt = 1000081002,
+        PhysicalDeviceFloat16Int8FeaturesKhr = 1000082000,
         PresentRegionsKhr = 1000084000,
         ObjectTableCreateInfoNvx = 1000086000,
         IndirectCommandsLayoutCreateInfoNvx = 1000086001,
@@ -1754,6 +1806,8 @@ namespace Vulkan
         PipelineDiscardRectangleStateCreateInfoExt = 1000099001,
         PhysicalDeviceConservativeRasterizationPropertiesExt = 1000101000,
         PipelineRasterizationConservativeStateCreateInfoExt = 1000101001,
+        PhysicalDeviceDepthClipEnableFeaturesExt = 1000102000,
+        PipelineRasterizationDepthClipStateCreateInfoExt = 1000102001,
         HdrMetadataExt = 1000105000,
         AttachmentDescription2Khr = 1000109000,
         AttachmentReference2Khr = 1000109001,
@@ -1806,6 +1860,12 @@ namespace Vulkan
         PipelineColorBlendAdvancedStateCreateInfoExt = 1000148002,
         PipelineCoverageToColorStateCreateInfoNv = 1000149000,
         PipelineCoverageModulationStateCreateInfoNv = 1000152000,
+        DrmFormatModifierPropertiesListExt = 1000158000,
+        DrmFormatModifierPropertiesExt = 1000158001,
+        PhysicalDeviceImageDrmFormatModifierInfoExt = 1000158002,
+        ImageDrmFormatModifierListCreateInfoExt = 1000158003,
+        ImageDrmFormatModifierExplicitCreateInfoExt = 1000158004,
+        ImageDrmFormatModifierPropertiesExt = 1000158005,
         ValidationCacheCreateInfoExt = 1000160000,
         ShaderModuleValidationCacheCreateInfoExt = 1000160001,
         DescriptorSetLayoutBindingFlagsCreateInfoExt = 1000161000,
@@ -1817,30 +1877,39 @@ namespace Vulkan
         PhysicalDeviceShadingRateImageFeaturesNv = 1000164001,
         PhysicalDeviceShadingRateImagePropertiesNv = 1000164002,
         PipelineViewportCoarseSampleOrderStateCreateInfoNv = 1000164005,
-        RaytracingPipelineCreateInfoNvx = 1000165000,
-        AccelerationStructureCreateInfoNvx = 1000165001,
-        GeometryInstanceNvx = 1000165002,
-        GeometryNvx = 1000165003,
-        GeometryTrianglesNvx = 1000165004,
-        GeometryAABBNvx = 1000165005,
-        BindAccelerationStructureMemoryInfoNvx = 1000165006,
-        DescriptorAccelerationStructureInfoNvx = 1000165007,
-        AccelerationStructureMemoryRequirementsInfoNvx = 1000165008,
-        PhysicalDeviceRaytracingPropertiesNvx = 1000165009,
-        HitShaderModuleCreateInfoNvx = 1000165010,
+        RayTracingPipelineCreateInfoNv = 1000165000,
+        AccelerationStructureCreateInfoNv = 1000165001,
+        GeometryNv = 1000165003,
+        GeometryTrianglesNv = 1000165004,
+        GeometryAABBNv = 1000165005,
+        BindAccelerationStructureMemoryInfoNv = 1000165006,
+        WriteDescriptorSetAccelerationStructureNv = 1000165007,
+        AccelerationStructureMemoryRequirementsInfoNv = 1000165008,
+        PhysicalDeviceRayTracingPropertiesNv = 1000165009,
+        RayTracingShaderGroupCreateInfoNv = 1000165011,
+        AccelerationStructureInfoNv = 1000165012,
         PhysicalDeviceRepresentativeFragmentTestFeaturesNv = 1000166000,
         PipelineRepresentativeFragmentTestStateCreateInfoNv = 1000166001,
+        PhysicalDeviceImageViewImageFormatInfoExt = 1000170000,
+        FilterCubicImageViewImageFormatPropertiesExt = 1000170001,
         DeviceQueueGlobalPriorityCreateInfoExt = 1000174000,
         PhysicalDevice8BitStorageFeaturesKhr = 1000177000,
         ImportMemoryHostPointerInfoExt = 1000178000,
         MemoryHostPointerPropertiesExt = 1000178001,
         PhysicalDeviceExternalMemoryHostPropertiesExt = 1000178002,
         PhysicalDeviceShaderAtomicInt64FeaturesKhr = 1000180000,
+        CalibratedTimestampInfoExt = 1000184000,
         PhysicalDeviceShaderCorePropertiesAmd = 1000185000,
+        DeviceMemoryOverallocationCreateInfoAmd = 1000189000,
         PhysicalDeviceVertexAttributeDivisorPropertiesExt = 1000190000,
         PipelineVertexInputDivisorStateCreateInfoExt = 1000190001,
         PhysicalDeviceVertexAttributeDivisorFeaturesExt = 1000190002,
+        PresentFrameTokenGgp = 1000191000,
+        PipelineCreationFeedbackCreateInfoExt = 1000192000,
         PhysicalDeviceDriverPropertiesKhr = 1000196000,
+        PhysicalDeviceFloatControlsPropertiesKhr = 1000197000,
+        PhysicalDeviceDepthStencilResolvePropertiesKhr = 1000199000,
+        SubpassDescriptionDepthStencilResolveKhr = 1000199001,
         PhysicalDeviceComputeShaderDerivativesFeaturesNv = 1000201000,
         PhysicalDeviceMeshShaderFeaturesNv = 1000202000,
         PhysicalDeviceMeshShaderPropertiesNv = 1000202001,
@@ -1851,7 +1920,34 @@ namespace Vulkan
         CheckpointDataNv = 1000206000,
         QueueFamilyCheckpointPropertiesNv = 1000206001,
         PhysicalDeviceVulkanMemoryModelFeaturesKhr = 1000211000,
+        PhysicalDevicePciBusInfoPropertiesExt = 1000212000,
+        DisplayNativeHdrSurfaceCapabilitiesAmd = 1000213000,
+        SwapchainDisplayNativeHdrCreateInfoAmd = 1000213001,
         ImagepipeSurfaceCreateInfoFuchsia = 1000214000,
+        MetalSurfaceCreateInfoExt = 1000217000,
+        PhysicalDeviceFragmentDensityMapFeaturesExt = 1000218000,
+        PhysicalDeviceFragmentDensityMapPropertiesExt = 1000218001,
+        RenderPassFragmentDensityMapCreateInfoExt = 1000218002,
+        PhysicalDeviceScalarBlockLayoutFeaturesExt = 1000221000,
+        PhysicalDeviceMemoryBudgetPropertiesExt = 1000237000,
+        PhysicalDeviceMemoryPriorityFeaturesExt = 1000238000,
+        MemoryPriorityAllocateInfoExt = 1000238001,
+        SurfaceProtectedCapabilitiesKhr = 1000239000,
+        PhysicalDeviceDedicatedAllocationImageAliasingFeaturesNv = 1000240000,
+        PhysicalDeviceBufferDeviceAddressFeaturesExt = 1000244000,
+        BufferDeviceAddressInfoExt = 1000244001,
+        BufferDeviceAddressCreateInfoExt = 1000244002,
+        ImageStencilUsageCreateInfoExt = 1000246000,
+        ValidationFeaturesExt = 1000247000,
+        PhysicalDeviceCooperativeMatrixFeaturesNv = 1000249000,
+        CooperativeMatrixPropertiesNv = 1000249001,
+        PhysicalDeviceCooperativeMatrixPropertiesNv = 1000249002,
+        PhysicalDeviceYcbcrImageArraysFeaturesExt = 1000252000,
+        SurfaceFullScreenExclusiveInfoExt = 1000255000,
+        SurfaceCapabilitiesFullScreenExclusiveExt = 1000255002,
+        SurfaceFullScreenExclusiveWin32InfoExt = 1000255001,
+        HeadlessSurfaceCreateInfoExt = 1000256000,
+        PhysicalDeviceHostQueryResetFeaturesExt = 1000261000,
     }
 
     public enum SystemAllocationScope : int
@@ -1935,7 +2031,7 @@ namespace Vulkan
         IndirectCommandsLayoutNvx = 1000086001,
         DebugUtilsMessengerExt = 1000128000,
         ValidationCacheExt = 1000160000,
-        AccelerationStructureNvx = 1000165000,
+        AccelerationStructureNv = 1000165000,
     }
 
     public enum IndirectCommandsTokenTypeNvx : int
@@ -2016,6 +2112,14 @@ namespace Vulkan
         Realtime = 1024,
     }
 
+    public enum TimeDomainExt : int
+    {
+        Device = 0,
+        ClockMonotonic = 1,
+        ClockMonotonicRaw = 2,
+        QueryPerformanceCounter = 3,
+    }
+
     public enum ConservativeRasterizationModeExt : int
     {
         Disabled = 0,
@@ -2023,22 +2127,66 @@ namespace Vulkan
         Underestimate = 2,
     }
 
-    public enum CopyAccelerationStructureModeNvx : int
+    public enum CopyAccelerationStructureModeNv : int
     {
         Clone = 0,
         Compact = 1,
     }
 
-    public enum AccelerationStructureTypeNvx : int
+    public enum AccelerationStructureTypeNv : int
     {
         TopLevel = 0,
         BottomLevel = 1,
     }
 
-    public enum GeometryTypeNvx : int
+    public enum GeometryTypeNv : int
     {
         Triangles = 0,
         Aabbs = 1,
+    }
+
+    public enum RayTracingShaderGroupTypeNv : int
+    {
+        General = 0,
+        TrianglesHitGroup = 1,
+        ProceduralHitGroup = 2,
+    }
+
+    public enum AccelerationStructureMemoryRequirementsTypeNv : int
+    {
+        Object = 0,
+        BuildScratch = 1,
+        UpdateScratch = 2,
+    }
+
+    public enum MemoryOverallocationBehaviorAmd : int
+    {
+        Default = 0,
+        Allowed = 1,
+        Disallowed = 2,
+    }
+
+    public enum ScopeNv : int
+    {
+        Device = 1,
+        Workgroup = 2,
+        Subgroup = 3,
+        QueueFamily = 5,
+    }
+
+    public enum ComponentTypeNv : int
+    {
+        Float16 = 0,
+        Float32 = 1,
+        Float64 = 2,
+        Sint8 = 3,
+        Sint16 = 4,
+        Sint32 = 5,
+        Sint64 = 6,
+        Uint8 = 7,
+        Uint16 = 8,
+        Uint32 = 9,
+        Uint64 = 10,
     }
 
     public enum ColorSpaceKhr : int
@@ -2058,6 +2206,7 @@ namespace Vulkan
         AdobergbNonlinearExt = 1000104012,
         PassThroughExt = 1000104013,
         ExtendedSrgbNonlinearExt = 1000104014,
+        DisplayNativeAmd = 1000213000,
     }
 
     public enum PresentModeKhr : int
@@ -2108,7 +2257,7 @@ namespace Vulkan
         ValidationCacheExt = 33,
         SamplerYcbcrConversion = 1000156000,
         DescriptorUpdateTemplate = 1000085000,
-        AccelerationStructureNvx = 1000165000,
+        AccelerationStructureNv = 1000165000,
     }
 
     public enum RasterizationOrderAmd : int
@@ -2121,6 +2270,23 @@ namespace Vulkan
     {
         All = 0,
         Shaders = 1,
+    }
+
+    public enum ValidationFeatureEnableExt : int
+    {
+        GpuAssisted = 0,
+        GpuAssistedReserveBindingSlot = 1,
+    }
+
+    public enum ValidationFeatureDisableExt : int
+    {
+        All = 0,
+        Shaders = 1,
+        ThreadSafety = 2,
+        ApiParameters = 3,
+        ObjectLifetimes = 4,
+        CoreChecks = 5,
+        UniqueHandles = 6,
     }
 
     public enum DisplayPowerStateExt : int
@@ -2181,6 +2347,14 @@ namespace Vulkan
         Conjoint = 2,
     }
 
+    public enum FullScreenExclusiveExt : int
+    {
+        Default = 0,
+        Allowed = 1,
+        Disallowed = 2,
+        ApplicationControlled = 3,
+    }
+
     public enum VendorId : int
     {
         Viv = 0x10001,
@@ -2199,6 +2373,8 @@ namespace Vulkan
         ImaginationProprietary = 7,
         QualcommProprietary = 8,
         ArmProprietary = 9,
+        GooglePastel = 10,
+        GgpProprietary = 11,
     }
 
     public enum ShadingRatePaletteEntryNv : int

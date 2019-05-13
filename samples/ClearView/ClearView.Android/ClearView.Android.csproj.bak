@@ -7,8 +7,8 @@
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <RootNamespace>ClearView</RootNamespace>
-    <AssemblyName>ClearView</AssemblyName>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <AssemblyName>ClearView.Android</AssemblyName>
+    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
     <AndroidApplication>True</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
@@ -65,21 +65,21 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Platforms\Android\Vulkan.Android.csproj">
+    <ProjectReference Include="..\..\..\src\Platforms\Android\Vulkan.Android.csproj">
       <Project>{53C04966-6CD8-456A-865B-17B03295DD06}</Project>
       <Name>Vulkan.Android</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Vulkan\Vulkan.csproj">
-      <Project>{15253E36-DDDE-4C0A-9A6E-7632BACC8F7C}</Project>
-      <Name>Vulkan</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Samples.Android\Samples.Android.csproj">
+    <ProjectReference Include="..\..\VulkanSample\VulkanSample.Android\VulkanSample.Android.csproj">
       <Project>{79C2E3E0-456B-491F-962F-E424E1241763}</Project>
-      <Name>Samples.Android</Name>
+      <Name>VulkanSample.Android</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Samples.Common\Samples.Common.csproj">
+    <ProjectReference Include="..\..\VulkanSample\VulkanSample.Common\VulkanSample.Common.csproj">
       <Project>{5C30400B-37A3-48E7-A10A-15A1CF984A9E}</Project>
-      <Name>Samples.Common</Name>
+      <Name>VulkanSample.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClearView.Common\ClearView.Common.csproj">
+      <Project>{A4DB854E-6B80-4E25-9DED-B530CD549ACE}</Project>
+      <Name>ClearView.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

@@ -19,12 +19,6 @@ namespace Vulkan.Linux.Interop
         const string VulkanLibrary = "vulkan";
 
         [DllImport(VulkanLibrary, CallingConvention = CallingConvention.Winapi)]
-        internal static unsafe extern Result vkCreateMirSurfaceKHR(IntPtr instance, MirSurfaceCreateInfoKhr* pCreateInfo, Vulkan.Interop.AllocationCallbacks* pAllocator, UInt64* pSurface);
-
-        [DllImport(VulkanLibrary, CallingConvention = CallingConvention.Winapi)]
-        internal static unsafe extern Bool32 vkGetPhysicalDeviceMirPresentationSupportKHR(IntPtr physicalDevice, UInt32 queueFamilyIndex, MirConnection* connection);
-
-        [DllImport(VulkanLibrary, CallingConvention = CallingConvention.Winapi)]
         internal static unsafe extern Result vkCreateWaylandSurfaceKHR(IntPtr instance, WaylandSurfaceCreateInfoKhr* pCreateInfo, Vulkan.Interop.AllocationCallbacks* pAllocator, UInt64* pSurface);
 
         [DllImport(VulkanLibrary, CallingConvention = CallingConvention.Winapi)]

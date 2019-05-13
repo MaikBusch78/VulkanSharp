@@ -22,7 +22,6 @@ namespace Vulkan
 
         void InitializeFunctions()
         {
-
             vkCreateDebugReportCallbackEXT = (NativeMethods.vkCreateDebugReportCallbackEXT)GetMethod("vkCreateDebugReportCallbackEXT", typeof(NativeMethods.vkCreateDebugReportCallbackEXT));
             vkDestroyDebugReportCallbackEXT = (NativeMethods.vkDestroyDebugReportCallbackEXT)GetMethod("vkDestroyDebugReportCallbackEXT", typeof(NativeMethods.vkDestroyDebugReportCallbackEXT));
             vkDebugReportMessageEXT = (NativeMethods.vkDebugReportMessageEXT)GetMethod("vkDebugReportMessageEXT", typeof(NativeMethods.vkDebugReportMessageEXT));

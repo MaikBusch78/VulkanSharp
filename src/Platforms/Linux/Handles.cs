@@ -16,25 +16,6 @@ namespace Vulkan.Linux
 {
     public static class InstanceExtension
     {
-        public static SurfaceKhr CreateMirSurfaceKHR(this Instance instance, MirSurfaceCreateInfoKhr pCreateInfo, AllocationCallbacks pAllocator = null)
-        {
-            Result result;
-            SurfaceKhr pSurface;
-            unsafe
-            {
-                pSurface = new SurfaceKhr();
-
-                fixed (UInt64* ptrpSurface = &pSurface.M)
-                {
-                    result = Linux.Interop.NativeMethods.vkCreateMirSurfaceKHR(instance.M, &pCreateInfo, pAllocator != null ? pAllocator.M : null, ptrpSurface);
-                }
-                if (result != Result.Success)
-                    throw new ResultException(result);
-
-                return pSurface;
-            }
-        }
-
         public static SurfaceKhr CreateWaylandSurfaceKHR(this Instance instance, WaylandSurfaceCreateInfoKhr pCreateInfo, AllocationCallbacks pAllocator = null)
         {
             Result result;
@@ -95,17 +76,6 @@ namespace Vulkan.Linux
 
     public static class PhysicalDeviceExtension
     {
-        public static Bool32 GetMirPresentationSupportKHR(this PhysicalDevice physicalDevice, UInt32 queueFamilyIndex, out MirConnection connection)
-        {
-            unsafe
-            {
-                fixed (MirConnection* ptrconnection = &connection)
-                {
-                    return Linux.Interop.NativeMethods.vkGetPhysicalDeviceMirPresentationSupportKHR(physicalDevice.M, queueFamilyIndex, ptrconnection);
-                }
-            }
-        }
-
         public static Bool32 GetWaylandPresentationSupportKHR(this PhysicalDevice physicalDevice, UInt32 queueFamilyIndex, out wl_display display)
         {
             unsafe
